@@ -1,6 +1,5 @@
 package com.example.pahanaedubillingsystem.backend.db;
 
-
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -12,7 +11,7 @@ public class DBConnection {
     private DBConnection() {
         try {
             InitialContext context = new InitialContext();
-            DataSource lookup = (DataSource) context.lookup("java:comp/env/jdbc/pahanaedu");
+            DataSource lookup = (DataSource) context.lookup("java:comp/env/jdbc/pahana_edu");
             this.connection = lookup.getConnection();
         } catch (Exception e) {
             e.printStackTrace();
