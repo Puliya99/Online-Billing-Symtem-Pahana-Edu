@@ -90,8 +90,8 @@ cd PahanaEduBillingSystem
 ### 🛢️ Setup MySQL Database
 
 ```sql
-CREATE DATABASE pahana_edu;
-USE pahana_edu;
+CREATE DATABASE PahanaEduBillingSystem;
+USE PahanaEduBillingSystem;
 
 CREATE TABLE users (
     username VARCHAR(50) PRIMARY KEY,
