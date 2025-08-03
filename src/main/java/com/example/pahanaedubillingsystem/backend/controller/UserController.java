@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import com.example.pahanaedubillingsystem.backend.dto.UserDTO;
-import com.example.pahanaedubillingsystem.backend.utill.CrudUtil;
+import com.example.pahanaedubillingsystem.backend.util.CrudUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
