@@ -11,7 +11,7 @@ $("#login-btn").on('click', () => {
 
     let user = new UserModel(username, password);
     $.ajax({
-        url: "http://localhost:8080/pos/UserModel",
+        url: "http://localhost:8081/PahanaEduBillingSystem/UserModel",
         method: "POST",
         contentType: "application/json",
         data: JSON.stringify(user),
