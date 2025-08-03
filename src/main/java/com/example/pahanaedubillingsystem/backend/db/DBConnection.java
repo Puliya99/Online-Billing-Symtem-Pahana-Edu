@@ -11,7 +11,7 @@ public class DBConnection {
     private DBConnection() {
         try {
             InitialContext context = new InitialContext();
-            DataSource lookup = (DataSource) context.lookup("java:comp/env/jdbc/pahana_edu");
+            DataSource lookup = (DataSource) context.lookup("java:comp/env/jdbc/PahanaEduBillingSystem");
             this.connection = lookup.getConnection();
         } catch (Exception e) {
             e.printStackTrace();
