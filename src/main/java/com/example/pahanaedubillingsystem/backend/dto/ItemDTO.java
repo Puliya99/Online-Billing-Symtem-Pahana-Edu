@@ -47,4 +47,14 @@ public class ItemDTO {
     public void setQty(int qty) {
         this.qty = qty;
     }
+
+    @Override
+    public String toString() {
+        return "ItemDTO{" +
+                "itemId='" + itemId + '\'' +
+                ", name='" + name + '\'' +
+                ", price=" + price +
+                ", qty=" + qty +
+                '}';
+    }
 }

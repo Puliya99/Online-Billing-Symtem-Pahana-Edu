@@ -52,4 +52,14 @@ public class BillDTO {
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
     }
+
+    @Override
+    public String toString() {
+        return "BillDTO{" +
+                "billId='" + billId + '\'' +
+                ", billDate=" + billDate +
+                ", accountNo='" + accountNo + '\'' +
+                ", totalAmount=" + totalAmount +
+                '}';
+    }
 }

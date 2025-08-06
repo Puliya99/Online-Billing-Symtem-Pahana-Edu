@@ -57,5 +57,16 @@ public class Customer {
     public void setUnitsConsumed(int unitsConsumed) {
         this.unitsConsumed = unitsConsumed;
     }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "accountNo='" + accountNo + '\'' +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", telephone='" + telephone + '\'' +
+                ", unitsConsumed=" + unitsConsumed +
+                '}';
+    }
 }
 

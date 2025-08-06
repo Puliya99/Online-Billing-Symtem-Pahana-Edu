@@ -57,4 +57,15 @@ public class CustomerDTO {
     public void setUnitsConsumed(int unitsConsumed) {
         this.unitsConsumed = unitsConsumed;
     }
+
+    @Override
+    public String toString() {
+        return "CustomerDTO{" +
+                "accountNo='" + accountNo + '\'' +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", telephone='" + telephone + '\'' +
+                ", unitsConsumed=" + unitsConsumed +
+                '}';
+    }
 }
