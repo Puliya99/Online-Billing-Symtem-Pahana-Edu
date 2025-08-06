@@ -20,6 +20,8 @@ public class BOFactory {
         switch (types) {
             case USER:
                 return new UserBOImpl();
+            case CUSTOMER:
+                return new CustomerBOImpl();
             default:
                 return null;
         }
