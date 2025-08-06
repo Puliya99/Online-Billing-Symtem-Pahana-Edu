@@ -22,6 +22,8 @@ public class DAOFactory {
                 return new UserDAOImpl();
             case CUSTOMER:
                 return new CustomerDAOImpl();
+            case ITEM:
+                return new ItemDAOImpl();
             default:
                 return null;
         }
