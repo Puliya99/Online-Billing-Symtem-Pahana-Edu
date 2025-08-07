@@ -24,6 +24,8 @@ public class BOFactory {
                 return new CustomerBOImpl();
             case ITEM:
                 return new ItemBOImpl();
+            case BILL:
+                return new BillBOImpl();
             default:
                 return null;
         }
