@@ -1,19 +1,19 @@
-package com.example.pahanaedubillingsystem.backend.dto;
+package com.example.pahanaedubillingsystem.backend.entity;
 
-public class ItemDTO {
+public class Item {
     private String itemId;
     private String name;
     private double price;
     private int qty;
 
-    public ItemDTO(String itemId, String name, double price, int qty) {
+    public Item(String itemId, String name, double price, int qty) {
         this.itemId = itemId;
         this.name = name;
         this.price = price;
         this.qty = qty;
     }
 
-    public ItemDTO() {
+    public Item() {
     }
 
     public String getItemId() {
@@ -50,7 +50,7 @@ public class ItemDTO {
 
     @Override
     public String toString() {
-        return "ItemDTO{" +
+        return "Item{" +
                 "itemId='" + itemId + '\'' +
                 ", name='" + name + '\'' +
                 ", price=" + price +

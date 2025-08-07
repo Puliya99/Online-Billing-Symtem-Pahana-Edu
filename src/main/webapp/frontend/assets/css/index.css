@@ -1,0 +1,451 @@
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #858796;
+    --success-color: #1cc88a;
+    --info-color: #36b9cc;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --light-color: #f8f9fc;
+    --dark-color: #5a5c69;
+    --sidebar-width: 14rem;
+    --topbar-height: 4.375rem;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+    background-color: #f8f9fc;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Login Section */
+#login-section {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+}
+
+.login-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 450px;
+}
+
+.login-header {
+    margin-bottom: 2rem;
+}
+
+.login-logo {
+    height: 80px;
+    margin-bottom: 1rem;
+}
+
+.login-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.login-form .form-control {
+    height: 50px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    padding-left: 15px;
+    transition: var(--transition);
+}
+
+.login-form .form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.login-form .input-group-text {
+    background-color: #f8f9fc;
+    border-right: none;
+}
+
+.login-form #login-btn {
+    height: 50px;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: var(--transition);
+}
+
+.login-form #login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
+}
+
+/* Navigation */
+#nav_bar {
+    background-color: white;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    padding: 0.5rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-logo {
+    height: 40px;
+    margin-right: 10px;
+}
+
+.brand-name {
+    font-weight: 800;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.navbar-nav {
+    gap: 0.5rem;
+}
+
+.nav-link {
+    color: var(--secondary-color);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--primary-color);
+    background-color: rgba(78, 115, 223, 0.1);
+}
+
+.nav-link i {
+    font-size: 0.9rem;
+    margin-right: 0.5rem;
+}
+
+/* Common Section Styles */
+.section-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.section-header h2 {
+    font-weight: 700;
+    color: var(--dark-color);
+    display: flex;
+    align-items: center;
+}
+
+.section-header p {
+    color: var(--secondary-color);
+    margin-bottom: 0;
+}
+
+/* Dashboard Section */
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.stats-row {
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    transition: var(--transition);
+    border-left: 0.25rem solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.customers {
+    border-left-color: var(--primary-color);
+}
+
+.stat-card.items {
+    border-left-color: var(--info-color);
+}
+
+.stat-card.bills {
+    border-left-color: var(--success-color);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-card.customers .stat-icon {
+    background-color: var(--primary-color);
+}
+
+.stat-card.items .stat-icon {
+    background-color: var(--info-color);
+}
+
+.stat-card.bills .stat-icon {
+    background-color: var(--success-color);
+}
+
+.stat-info h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stat-info p {
+    color: var(--secondary-color);
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.recent-activity {
+    background: white;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    padding: 1.5rem;
+}
+
+.recent-activity h4 {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.activity-item {
+    display: flex;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e3e6f0;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    background-color: rgba(78, 115, 223, 0.1);
+}
+
+.activity-content p {
+    margin-bottom: 0.25rem;
+    font-weight: 600;
+}
+
+.activity-content small {
+    font-size: 0.8rem;
+}
+
+/* Form and Data Cards */
+.form-card, .data-card {
+    background: white;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+    padding: 1.5rem;
+    height: 100%;
+}
+
+.form-card h4, .data-card h4 {
+    font-weight: 600;
+    color: var(--dark-color);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.form-control, .form-select {
+    border: 1px solid #d1d3e2;
+    border-radius: 0.35rem;
+    padding: 0.75rem 1rem;
+    transition: var(--transition);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.input-group-text {
+    background-color: #f8f9fc;
+    border: 1px solid #d1d3e2;
+}
+
+.buttons button {
+    transition: var(--transition);
+}
+
+.buttons button i {
+    margin-right: 0.5rem;
+}
+
+/* Tables */
+.table {
+    color: var(--dark-color);
+}
+
+.table thead th {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+    border-bottom-width: 1px;
+    border-color: #e3e6f0;
+    padding: 1rem;
+}
+
+.table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-color: #e3e6f0;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(78, 115, 223, 0.05);
+}
+
+/* Bill Section Styles */
+.bill-header, .customer-details, .bill-summary, .bill-history {
+    margin-bottom: 1.5rem;
+}
+
+.customer-details .card, .bill-summary .card, .bill-history .card {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+}
+
+.customer-details .card-header, .bill-history .card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    font-weight: 600;
+}
+
+.total-amount {
+    background-color: #f8f9fc;
+    padding: 1.5rem;
+    border-radius: 0.35rem;
+    border-left: 0.25rem solid var(--success-color);
+}
+
+.total-amount h2 {
+    color: var(--success-color);
+    font-weight: 700;
+}
+
+#bill-btn {
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+}
+
+/* Help Section */
+.help-content h4 {
+    color: var(--dark-color);
+    font-weight: 700;
+}
+
+.accordion-button {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: rgba(78, 115, 223, 0.1);
+    color: var(--primary-color);
+}
+
+.accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(78, 115, 223, 0.25);
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+    .navbar-nav {
+        gap: 0;
+    }
+
+    .nav-link {
+        padding: 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .login-card {
+        padding: 1.5rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.5rem;
+    }
+
+    .data-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .search-box {
+        width: 100%;
+        margin-top: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    #login-section {
+        padding: 1rem;
+    }
+
+    .login-card {
+        padding: 1.25rem;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .buttons button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+
+    .buttons button:last-child {
+        margin-bottom: 0;
+    }
+}
