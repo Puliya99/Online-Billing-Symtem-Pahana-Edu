@@ -1,13 +1,13 @@
-package com.example.pahanaedubillingsystem.backend.dto;
+package com.example.pahanaedubillingsystem.backend.entity;
 
-public class CustomerDTO {
+public class Customer {
     private String accountNo;
     private String name;
     private String address;
     private String telephone;
     private int unitsConsumed;
 
-    public CustomerDTO(String accountNo, String name, String address, String telephone, int unitsConsumed) {
+    public Customer(String accountNo, String name, String address, String telephone, int unitsConsumed) {
         this.accountNo = accountNo;
         this.name = name;
         this.address = address;
@@ -15,7 +15,7 @@ public class CustomerDTO {
         this.unitsConsumed = unitsConsumed;
     }
 
-    public CustomerDTO() {
+    public Customer() {
     }
 
     public String getAccountNo() {
@@ -60,7 +60,7 @@ public class CustomerDTO {
 
     @Override
     public String toString() {
-        return "CustomerDTO{" +
+        return "Customer{" +
                 "accountNo='" + accountNo + '\'' +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
@@ -69,3 +69,4 @@ public class CustomerDTO {
                 '}';
     }
 }
+

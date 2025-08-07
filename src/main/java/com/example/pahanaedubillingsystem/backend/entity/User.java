@@ -1,15 +1,15 @@
-package com.example.pahanaedubillingsystem.backend.dto;
+package com.example.pahanaedubillingsystem.backend.entity;
 
-public class UserDTO {
+public class User {
     private String username;
     private String password;
 
-    public UserDTO(String username, String password) {
+    public User(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
-    public UserDTO() {
+    public User() {
     }
 
     public String getUsername() {
@@ -30,7 +30,7 @@ public class UserDTO {
 
     @Override
     public String toString() {
-        return "UserDTO{" +
+        return "User{" +
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 '}';

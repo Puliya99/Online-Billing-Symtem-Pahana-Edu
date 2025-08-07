@@ -1,24 +1,21 @@
-package com.example.pahanaedubillingsystem.backend.dto;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+package com.example.pahanaedubillingsystem.backend.entity;
 
 import java.util.Date;
 
-public class BillDTO {
+public class Bill {
     private String billId;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
     private Date billDate;
     private String accountNo;
     private double totalAmount;
 
-    public BillDTO(String billId, Date billDate, String accountNo, double totalAmount) {
+    public Bill(String billId, Date billDate, String accountNo, double totalAmount) {
         this.billId = billId;
         this.billDate = billDate;
         this.accountNo = accountNo;
         this.totalAmount = totalAmount;
     }
 
-    public BillDTO() {
+    public Bill() {
     }
 
     public String getBillId() {
@@ -55,7 +52,7 @@ public class BillDTO {
 
     @Override
     public String toString() {
-        return "BillDTO{" +
+        return "Bill{" +
                 "billId='" + billId + '\'' +
                 ", billDate=" + billDate +
                 ", accountNo='" + accountNo + '\'' +
