@@ -1,13 +1,14 @@
 package com.example.pahanaedubillingsystem.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.pahanaedubillingsystem.backend.bo.BOFactory;
+import com.example.pahanaedubillingsystem.backend.bo.custom.ItemBO;
+import com.example.pahanaedubillingsystem.backend.dto.ItemDTO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.example.pahanaedubillingsystem.backend.dto.ItemDTO;
-import com.example.pahanaedubillingsystem.backend.util.CrudUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,18 +18,19 @@ import java.util.List;
 @WebServlet(name = "ItemModel", urlPatterns = "/ItemModel", loadOnStartup = 4)
 public class ItemController extends HttpServlet {
     private final static Logger logger = LoggerFactory.getLogger(ItemController.class);
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            List<ItemDTO> items = CrudUtil.getInstance().getAll(ItemDTO.class);
+            List<ItemDTO> items = itemBO.getAllItems();
             String jsonItems = objectMapper.writeValueAsString(items);
             resp.setContentType("application/json");
             resp.getWriter().write(jsonItems);
             logger.info("Get All Items");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error fetching items", e);
             resp.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error fetching items");
         }
     }
@@ -37,13 +39,7 @@ public class ItemController extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             ItemDTO item = objectMapper.readValue(req.getInputStream(), ItemDTO.class);
-            boolean isSaved = CrudUtil.getInstance().save(
-                    ItemDTO.class,
-                    item.getItemId(),
-                    item.getName(),
-                    item.getPrice(),
-                    item.getQty()
-            );
+            boolean isSaved = itemBO.saveItem(item);
             resp.getWriter().write(isSaved ? "saved" : "not saved");
             logger.info(isSaved ? "Item Saved" : "Item Not Saved");
         } catch (Exception e) {
@@ -56,14 +52,7 @@ public class ItemController extends HttpServlet {
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
             ItemDTO item = objectMapper.readValue(req.getInputStream(), ItemDTO.class);
-
-            boolean isUpdated = CrudUtil.getInstance().update(
-                    ItemDTO.class,
-                    item.getName(),
-                    item.getPrice(),
-                    item.getQty(),
-                    item.getItemId()
-            );
+            boolean isUpdated = itemBO.updateItem(item);
             resp.getWriter().write(isUpdated ? "updated" : "not updated");
             logger.info(isUpdated ? "Item Updated" : "Item Not Updated");
         } catch (Exception e) {
@@ -75,7 +64,8 @@ public class ItemController extends HttpServlet {
     @Override
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         try {
-            boolean isDeleted = CrudUtil.getInstance().deleteItem(req.getParameter("item_id"));
+            String itemId = req.getParameter("item_id");
+            boolean isDeleted = itemBO.deleteItem(itemId);
             resp.getWriter().write(isDeleted ? "deleted" : "not deleted");
             logger.info(isDeleted ? "Item Deleted" : "Item Not Deleted");
         } catch (Exception e) {
