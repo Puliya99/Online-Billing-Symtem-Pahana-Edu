@@ -90,8 +90,8 @@ cd PahanaEduBillingSystem
 ### 🛢️ Setup MySQL Database
 
 ```sql
-CREATE DATABASE pahana_edu;
-USE pahana_edu;
+CREATE DATABASE PahanaEduBillingSystem;
+USE PahanaEduBillingSystem;
 
 CREATE TABLE users (
     username VARCHAR(50) PRIMARY KEY,
@@ -131,7 +131,7 @@ Edit `webapp/META-INF/context.xml` with your MySQL credentials:
           maxTotal="10" maxIdle="8" maxWaitMillis="-1"
           username="root" password="your_password"
           driverClassName="com.mysql.cj.jdbc.Driver"
-          url="jdbc:mysql://localhost:3306/pahana_edu"/>
+          url="jdbc:mysql://localhost:3306/PahanaEduBillingSystem"/>
 ```
 
 ### 🚀 Deploy to Apache Tomcat
