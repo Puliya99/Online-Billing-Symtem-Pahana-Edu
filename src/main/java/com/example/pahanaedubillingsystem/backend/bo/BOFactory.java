@@ -22,6 +22,8 @@ public class BOFactory {
                 return new UserBOImpl();
             case CUSTOMER:
                 return new CustomerBOImpl();
+            case ITEM:
+                return new ItemBOImpl();
             default:
                 return null;
         }
