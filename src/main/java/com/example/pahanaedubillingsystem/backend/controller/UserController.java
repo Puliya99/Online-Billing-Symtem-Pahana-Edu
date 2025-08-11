@@ -4,11 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.pahanaedubillingsystem.backend.bo.BOFactory;
 import com.example.pahanaedubillingsystem.backend.bo.custom.UserBO;
 import com.example.pahanaedubillingsystem.backend.dto.UserDTO;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,14 +22,20 @@ public class UserController extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        resp.setContentType("text/plain");
+        resp.setCharacterEncoding("UTF-8");
         try {
             UserDTO user = objectMapper.readValue(req.getInputStream(), UserDTO.class);
             boolean isValid = userBO.validateUser(user.getUsername(), user.getPassword());
+            if (isValid) {
+                req.getSession(true).setAttribute("username", user.getUsername());
+            }
             resp.getWriter().write(isValid ? "valid" : "invalid");
             logger.info(isValid ? "User Authenticated" : "User Authentication Failed");
         } catch (Exception e) {
             logger.error("User Authentication Error", e);
-            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error authenticating user");
+            resp.setStatus(HttpServletResponse.SC_OK);
+            resp.getWriter().write("invalid");
         }
     }
 }
