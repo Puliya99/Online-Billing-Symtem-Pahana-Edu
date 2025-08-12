@@ -135,6 +135,17 @@
       background-color: rgba(78, 115, 223, 0.05);
       cursor: pointer;
     }
+    .alert {
+      padding: 0.75rem 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid transparent;
+      border-radius: 0.25rem;
+    }
+    .alert-warning {
+      color: #856404;
+      background-color: #fff3cd;
+      border-color: #ffeaa7;
+    }
   </style>
 </head>
 <body>
@@ -146,6 +157,9 @@
   </div>
   <div class="form-card">
     <h4><i class="fas fa-edit"></i> Item Form</h4>
+    <div class="alert alert-warning" style="display: none;" id="deleteWarning">
+      <strong>Note:</strong> Items with associated bills cannot be deleted. Please delete all bills for this item first.
+    </div>
     <form id="item-form">
       <div class="form-group">
         <label for="itemId">Item ID</label>
@@ -185,32 +199,45 @@
   </div>
   <div class="data-card">
     <h4><i class="fas fa-list"></i> Item List</h4>
-    <table class="table">
-      <thead>
-      <tr>
-        <th>Item ID</th>
-        <th>Description</th>
-        <th>Price</th>
-        <th>Qty</th>
-      </tr>
-      </thead>
-      <tbody id="itemTable">
-      <%
-        ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
-        List<ItemDTO> items = itemBO.getAllItems();
-        for (ItemDTO item : items) {
-      %>
-      <tr onclick="selectItem('<%= item.getItemId() %>', '<%= item.getName() %>', <%= item.getPrice() %>, <%= item.getQty() %>)">
-        <td><%= item.getItemId() %></td>
-        <td><%= item.getName() %></td>
-        <td><%= item.getPrice() %></td>
-        <td><%= item.getQty() %></td>
-      </tr>
-      <% } %>
-      </tbody>
-    </table>
+
+    <!-- Search Bar -->
+    <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search by Description or Item ID" style="flex: 1;">
+      <button type="button" class="btn btn-primary" onclick="searchItem()">
+        <i class="fas fa-search"></i> Search
+      </button>
+    </div>
+
+    <!-- Scrollable Table -->
+    <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e3e6f0; border-radius: 0.35rem;">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Item ID</th>
+          <th>Description</th>
+          <th>Price</th>
+          <th>Qty</th>
+        </tr>
+        </thead>
+        <tbody id="itemTable">
+        <%
+          ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
+          List<ItemDTO> items = itemBO.getAllItems();
+          for (ItemDTO item : items) {
+        %>
+        <tr onclick="selectItem('<%= item.getItemId() %>', '<%= item.getName() %>', <%= item.getPrice() %>, <%= item.getQty() %>)">
+          <td><%= item.getItemId() %></td>
+          <td><%= item.getName() %></td>
+          <td><%= item.getPrice() %></td>
+          <td><%= item.getQty() %></td>
+        </tr>
+        <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
+
 <script>
   let rowIndex = null;
 
@@ -291,6 +318,7 @@
         break;
       }
     }
+    document.getElementById('deleteWarning').style.display = 'none';
   }
 
   function updateItem() {
@@ -327,17 +355,36 @@
       alert('Please select an item to delete!');
       return;
     }
-    if (!confirm('Are you sure you want to delete this item?')) return;
+
     const id = document.getElementById('itemId').value;
+
+    if (!id || id.trim() === '') {
+      alert('Please select a valid item to delete!');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this item?\n\nNote: Items with associated bills cannot be deleted.')) {
+      return;
+    }
+
+    console.log('Attempting to delete item with ID:', id);
+
     const xhr = new XMLHttpRequest();
-    xhr.open('DELETE', `http://localhost:8081/PahanaEduBillingSystem/ItemModel?item_id=${id}`, true);
+    const url = 'http://localhost:8081/PahanaEduBillingSystem/ItemModel?item_id=' + encodeURIComponent(id);
+    console.log('DELETE URL:', url);
+
+    xhr.open('DELETE', url, true);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
+        console.log('Response status:', xhr.status, 'Response text:', xhr.responseText);
         if (xhr.status === 200 && xhr.responseText === 'deleted') {
           alert('Item Deleted Successfully!');
           window.location.reload();
+        } else if (xhr.status === 200 && xhr.responseText === 'not deleted') {
+          document.getElementById('deleteWarning').style.display = 'block';
+          alert('Cannot delete item!\n\nThis item has associated bills. Please delete all bills for this item first before attempting to delete the item.');
         } else {
-          alert('Error deleting item!');
+          alert('Error deleting item! Status: ' + xhr.status);
         }
       }
     };
@@ -346,8 +393,33 @@
 
   function resetForm() {
     document.getElementById('item-form').reset();
+    document.getElementById('deleteWarning').style.display = 'none';
+    rowIndex = null;
     setTimeout(loadId, 10);
   }
+
+  // Search Function
+  function searchItem() {
+    const filter = document.getElementById('searchInput').value.toLowerCase();
+    const table = document.getElementById('itemTable');
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+      const itemId = rows[i].cells[0].innerText.toLowerCase();
+      const description = rows[i].cells[1].innerText.toLowerCase();
+      if (itemId.includes(filter) || description.includes(filter)) {
+        rows[i].style.display = '';
+      } else {
+        rows[i].style.display = 'none';
+      }
+    }
+  }
+
+  document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      searchItem();
+    }
+  });
 </script>
 </body>
 </html>
