@@ -1,6 +1,6 @@
 <Context>
     <Resource name="jdbc/PahanaEduBillingSystem" auth="Container" type="javax.sql.DataSource"
               maxTotal="10" maxIdle="8" maxWaitMillis="-1"
-              username="pulinda" password="Puinda@2" driverClassName="com.mysql.cj.jdbc.Driver"
+              username="pulinda" password="Pulinda@2" driverClassName="com.mysql.cj.jdbc.Driver"
               url="jdbc:mysql://localhost:3306/PahanaEduBillingSystem"/>
 </Context>

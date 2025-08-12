@@ -66,7 +66,7 @@
         <span class="brand-name">Pahana Edu</span>
     </div>
     <ul class="nav-list">
-        <li><a id="dashboard" class="nav-link" href="login.jsp"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
+        <li><a id="dashboard" class="nav-link" href="dashboard.jsp"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
         <li><a id="customer" class="nav-link" href="customer.jsp"><i class="fas fa-users"></i>Customer</a></li>
         <li><a id="item" class="nav-link" href="item.jsp"><i class="fas fa-box-open"></i>Item</a></li>
         <li><a id="bill" class="nav-link" href="bill.jsp"><i class="fas fa-file-invoice-dollar"></i>Bill</a></li>
