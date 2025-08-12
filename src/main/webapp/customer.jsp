@@ -2,7 +2,7 @@
   Created by IntelliJ IDEA.
   User: lmarcho
   Date: 8/8/25
-  Time: 5:40 PM
+  Time: 5:40 PM
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
@@ -135,6 +135,17 @@
       background-color: rgba(78, 115, 223, 0.05);
       cursor: pointer;
     }
+    .alert {
+      padding: 0.75rem 1.25rem;
+      margin-bottom: 1rem;
+      border: 1px solid transparent;
+      border-radius: 0.25rem;
+    }
+    .alert-warning {
+      color: #856404;
+      background-color: #fff3cd;
+      border-color: #ffeaa7;
+    }
   </style>
 </head>
 <body>
@@ -144,8 +155,13 @@
     <h2><i class="fas fa-users"></i> Customer Management</h2>
     <p>Manage your customers and their details</p>
   </div>
+
+  <!-- Customer Form -->
   <div class="form-card">
     <h4><i class="fas fa-user-edit"></i> Customer Form</h4>
+    <div class="alert alert-warning" style="display: none;" id="deleteWarning">
+      <strong>Note:</strong> Customers with associated bills cannot be deleted. Please delete all bills for this customer first.
+    </div>
     <form id="customer-form">
       <div class="form-group">
         <label for="cusId">Account No</label>
@@ -190,36 +206,51 @@
       </div>
     </form>
   </div>
+
+  <!-- Customer List -->
   <div class="data-card">
     <h4><i class="fas fa-list"></i> Customer List</h4>
-    <table class="table">
-      <thead>
-      <tr>
-        <th>Account No</th>
-        <th>Name</th>
-        <th>Address</th>
-        <th>Contact</th>
-        <th>Units</th>
-      </tr>
-      </thead>
-      <tbody id="cusTable">
-      <%
-        CustomerBO customerBO = (CustomerBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.CUSTOMER);
-        List<CustomerDTO> customers = customerBO.getAllCustomers();
-        for (CustomerDTO customer : customers) {
-      %>
-      <tr onclick="selectCustomer('<%= customer.getAccountNo() %>', '<%= customer.getName() %>', '<%= customer.getAddress() %>', '<%= customer.getTelephone() %>', <%= customer.getUnitsConsumed() %>)">
-        <td><%= customer.getAccountNo() %></td>
-        <td><%= customer.getName() %></td>
-        <td><%= customer.getAddress() %></td>
-        <td><%= customer.getTelephone() %></td>
-        <td><%= customer.getUnitsConsumed() %></td>
-      </tr>
-      <% } %>
-      </tbody>
-    </table>
+
+    <!-- Search Bar -->
+    <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search by Name or Account No" style="flex: 1;">
+      <button type="button" class="btn btn-primary" onclick="searchCustomer()">
+        <i class="fas fa-search"></i> Search
+      </button>
+    </div>
+
+    <!-- Scrollable Table -->
+    <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e3e6f0; border-radius: 0.35rem;">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>Account No</th>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Contact</th>
+          <th>Units</th>
+        </tr>
+        </thead>
+        <tbody id="cusTable">
+        <%
+          CustomerBO customerBO = (CustomerBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.CUSTOMER);
+          List<CustomerDTO> customers = customerBO.getAllCustomers();
+          for (CustomerDTO customer : customers) {
+        %>
+        <tr onclick="selectCustomer('<%= customer.getAccountNo() %>', '<%= customer.getName() %>', '<%= customer.getAddress() %>', '<%= customer.getTelephone() %>', <%= customer.getUnitsConsumed() %>)">
+          <td><%= customer.getAccountNo() %></td>
+          <td><%= customer.getName() %></td>
+          <td><%= customer.getAddress() %></td>
+          <td><%= customer.getTelephone() %></td>
+          <td><%= customer.getUnitsConsumed() %></td>
+        </tr>
+        <% } %>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
+
 <script>
   let rowIndex = null;
 
@@ -248,11 +279,11 @@
       alert('Please enter a valid Account No (e.g., C001)!');
       return false;
     }
-    if (!/^[a-zA-Z]{4,60}$/.test(name)) {
+    if (!/^[a-zA-Z\s]{4,60}$/.test(name)) {
       alert('Please enter a valid name!');
       return false;
     }
-    if (!/^[a-zA-Z0-9,/]{4,60}$/.test(address)) {
+    if (!/^[a-zA-Z0-9,/\s]{4,60}$/.test(address)) {
       alert('Please enter a valid address!');
       return false;
     }
@@ -286,7 +317,7 @@
           alert('Customer Saved Successfully!');
           window.location.reload();
         } else {
-          alert('Error saving customer!');
+          alert('Error saving customer! Please check if the account number already exists.');
         }
       }
     };
@@ -294,11 +325,16 @@
   }
 
   function selectCustomer(id, name, address, contact, units) {
+    console.log('Selecting customer:', id, name, address, contact, units); // Debug log
+
     document.getElementById('cusId').value = id;
     document.getElementById('cusName').value = name;
     document.getElementById('cusAddress').value = address;
     document.getElementById('cusContact').value = contact;
     document.getElementById('cusUnits').value = units;
+
+    document.getElementById('deleteWarning').style.display = 'none';
+
     const tableRows = document.getElementById('cusTable').getElementsByTagName('tr');
     for (let i = 0; i < tableRows.length; i++) {
       if (tableRows[i].cells[0].innerText === id) {
@@ -306,6 +342,8 @@
         break;
       }
     }
+
+    console.log('Customer selected, rowIndex:', rowIndex, 'Account ID field value:', document.getElementById('cusId').value); // Debug log
   }
 
   function updateCustomer() {
@@ -343,17 +381,36 @@
       alert('Please select a customer to delete!');
       return;
     }
-    if (!confirm('Are you sure you want to delete this customer?')) return;
+
     const id = document.getElementById('cusId').value;
+
+    if (!id || id.trim() === '') {
+      alert('Please select a valid customer to delete!');
+      return;
+    }
+
+    if (!confirm('Are you sure you want to delete this customer?\n\nNote: Customers with associated bills cannot be deleted.')) {
+      return;
+    }
+
+    console.log('Attempting to delete customer with ID:', id);
+
     const xhr = new XMLHttpRequest();
-    xhr.open('DELETE', `http://localhost:8081/PahanaEduBillingSystem/CustomerModel?account_no=${id}`, true);
+    const url = 'http://localhost:8081/PahanaEduBillingSystem/CustomerModel?account_no=' + encodeURIComponent(id);
+    console.log('DELETE URL:', url);
+
+    xhr.open('DELETE', url, true);
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
+        console.log('Response status:', xhr.status, 'Response text:', xhr.responseText);
         if (xhr.status === 200 && xhr.responseText === 'deleted') {
           alert('Customer Deleted Successfully!');
           window.location.reload();
+        } else if (xhr.status === 200 && xhr.responseText === 'not deleted') {
+          document.getElementById('deleteWarning').style.display = 'block';
+          alert('Cannot delete customer!\n\nThis customer has associated bills. Please delete all bills for this customer first before attempting to delete the customer.');
         } else {
-          alert('Error deleting customer!');
+          alert('Error deleting customer! Status: ' + xhr.status);
         }
       }
     };
@@ -362,8 +419,33 @@
 
   function resetForm() {
     document.getElementById('customer-form').reset();
+    document.getElementById('deleteWarning').style.display = 'none';
+    rowIndex = null;
     setTimeout(loadId, 10);
   }
+
+  // Search Function
+  function searchCustomer() {
+    const filter = document.getElementById('searchInput').value.toLowerCase();
+    const table = document.getElementById('cusTable');
+    const rows = table.getElementsByTagName('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+      const accountNo = rows[i].cells[0].innerText.toLowerCase();
+      const name = rows[i].cells[1].innerText.toLowerCase();
+      if (accountNo.includes(filter) || name.includes(filter)) {
+        rows[i].style.display = '';
+      } else {
+        rows[i].style.display = 'none';
+      }
+    }
+  }
+
+  document.getElementById('searchInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      searchCustomer();
+    }
+  });
 </script>
 </body>
 </html>
