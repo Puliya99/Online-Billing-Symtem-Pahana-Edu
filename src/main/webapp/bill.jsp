@@ -6,7 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List, com.example.pahanaedubillingsystem.backend.dto.CustomerDTO, com.example.pahanaedubillingsystem.backend.dto.BillDTO, com.example.pahanaedubillingsystem.backend.bo.BOFactory, com.example.pahanaedubillingsystem.backend.bo.custom.CustomerBO, com.example.pahanaedubillingsystem.backend.bo.custom.BillBO" %>
+<%@ page import="java.util.List, com.example.pahanaedubillingsystem.backend.dto.CustomerDTO, com.example.pahanaedubillingsystem.backend.dto.ItemDTO, com.example.pahanaedubillingsystem.backend.dto.BillDTO, com.example.pahanaedubillingsystem.backend.bo.BOFactory, com.example.pahanaedubillingsystem.backend.bo.custom.CustomerBO, com.example.pahanaedubillingsystem.backend.bo.custom.ItemBO, com.example.pahanaedubillingsystem.backend.bo.custom.BillBO" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -124,6 +124,10 @@
         .table tbody tr:hover {
             background-color: rgba(78, 115, 223, 0.05);
         }
+        .table-scroll {
+            max-height: 300px;
+            overflow-y: auto;
+        }
         .row {
             display: flex;
             flex-wrap: wrap;
@@ -175,7 +179,7 @@
     <div class="customer-details">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-user-tag"></i> Customer Details</h5>
+                <h5><i class="fas fa-user-tag"></i> Customer & Item Details</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -202,8 +206,41 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="billCusUnits">Units Consumed</label>
-                            <input type="text" class="form-control" id="billCusUnits" disabled>
+                            <label for="itemId">Item ID</label>
+                            <select id="itemId" class="form-select" onchange="loadItemDetails()">
+                                <option selected disabled>Select Item</option>
+                                <%
+                                    ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
+                                    List<ItemDTO> items = itemBO.getAllItems();
+                                    for (ItemDTO item : items) {
+                                %>
+                                <option value="<%= item.getItemId() %>"><%= item.getItemId() %></option>
+                                <% } %>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="itemName">Item Description</label>
+                            <input type="text" class="form-control" id="itemName" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="itemPrice">Item Price</label>
+                            <input type="text" class="form-control" id="itemPrice" disabled>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="qty">Qty</label>
+                            <input type="number" class="form-control" id="qty" oninput="calculateTotal()">
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="discount">Discount</label>
+                            <input type="number" class="form-control" id="discount" oninput="calculateTotal()">
                         </div>
                     </div>
                 </div>
@@ -221,7 +258,8 @@
                         </div>
                     </div>
                     <div class="col-md-6" style="text-align: right;">
-                        <button class="btn" onclick="generateBill()"><i class="fas fa-file-invoice"></i> Generate Bill</button>
+                        <button class="btn" id="generateBtn" onclick="generateBill()"><i class="fas fa-file-invoice"></i> Generate Bill</button>
+                        <button class="btn" id="updateBtn" onclick="updateBill()" style="display:none;background-color:#4e73df;margin-left:10px"><i class="fas fa-save"></i> Update Bill</button>
                     </div>
                 </div>
             </div>
@@ -232,31 +270,53 @@
             <div class="card-header">
                 <h5><i class="fas fa-history"></i> Bill History</h5>
             </div>
+            <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by Bill Id" style="flex: 1;">
+                <button type="button" class="btn btn-primary" onclick="searchBill()">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
             <div class="card-body">
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th>Bill ID</th>
-                        <th>Date</th>
-                        <th>Customer ID</th>
-                        <th>Total Amount</th>
-                    </tr>
-                    </thead>
-                    <tbody id="billTable">
-                    <%
-                        BillBO billBO = (BillBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.BILL);
-                        List<BillDTO> bills = billBO.getAllBills();
-                        for (BillDTO bill : bills) {
-                    %>
-                    <tr>
-                        <td><%= bill.getBillId() %></td>
-                        <td><%= bill.getBillDate() %></td>
-                        <td><%= bill.getAccountNo() %></td>
-                        <td><%= bill.getTotalAmount() %></td>
-                    </tr>
-                    <% } %>
-                    </tbody>
-                </table>
+                <div class="table-scroll">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Bill ID</th>
+                            <th>Date</th>
+                            <th>Customer ID</th>
+                            <th>Item ID</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Discount</th>
+                            <th>Total Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody id="billTable">
+                        <%
+                            BillBO billBO = (BillBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.BILL);
+                            List<BillDTO> bills = billBO.getAllBills();
+                            for (BillDTO bill : bills) {
+                        %>
+                        <tr data-bill-id="<%= bill.getBillId() %>">
+                            <td><%= bill.getBillId() %></td>
+                            <td><%= bill.getBillDate() %></td>
+                            <td><%= bill.getAccountNo() %></td>
+                            <td><%= bill.getItemId() %></td>
+                            <td><%= bill.getQty() %></td>
+                            <td><%= bill.getUnitPrice() %></td>
+                            <td><%= bill.getDiscount() %></td>
+                            <td><%= bill.getTotalAmount() %></td>
+                            <td>
+                                <button title="Print" style="background:none;border:none;color:#4e73df;cursor:pointer" onclick="printBill('<%= bill.getBillId() %>')"><i class="fas fa-print"></i></button>
+                                <button title="Edit" style="background:none;border:none;color:#1cc88a;cursor:pointer" onclick="editBill('<%= bill.getBillId() %>','<%= bill.getAccountNo() %>','<%= bill.getItemId() %>',<%= bill.getQty() %>,<%= bill.getUnitPrice() %>,<%= bill.getDiscount() %>)"><i class="fas fa-edit"></i></button>
+                                <button title="Delete" style="background:none;border:none;color:#e74a3b;cursor:pointer" onclick="deleteBill('<%= bill.getBillId() %>')"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        <% } %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -299,7 +359,26 @@
                 const customer = customers.find(cus => cus.accountNo === cusId);
                 if (customer) {
                     document.getElementById('billCusName').value = customer.name;
-                    document.getElementById('billCusUnits').value = customer.unitsConsumed;
+                    calculateTotal();
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function loadItemDetails() {
+        const itemId = document.getElementById('itemId').value;
+        if (!itemId) return;
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'http://localhost:8081/PahanaEduBillingSystem/ItemModel', true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                const items = JSON.parse(xhr.responseText);
+                const item = items.find(itm => itm.itemId === itemId);
+                if (item) {
+                    document.getElementById('itemName').value = item.name;
+                    document.getElementById('itemPrice').value = item.price.toFixed(2);
+                    window.itemPrice = item.price;
                     calculateTotal();
                 }
             }
@@ -308,23 +387,31 @@
     }
 
     function calculateTotal() {
-        const units = parseInt(document.getElementById('billCusUnits').value) || 0;
-        const total = units * 100; // Rs.100 per unit
-        document.getElementById('billTotal').innerText = `Rs. ${total.toFixed(2)}`;
+        const qty = parseInt(document.getElementById('qty').value, 10) || 0;
+        const discount = parseInt(document.getElementById('discount').value) || 0;
+        const unitPrice = parseFloat(document.getElementById('itemPrice').value) || 0;
+        const discountBeforePrice = qty * unitPrice;
+        const totalPrice = discountBeforePrice - (discountBeforePrice * discount / 100);
+        document.getElementById('billTotal').innerText = 'Rs. ' + totalPrice.toFixed(2);
     }
 
     function generateBill() {
         const billId = document.getElementById('billId').value;
         const billDate = document.getElementById('billDate').value;
         const accountNo = document.getElementById('billCusId').value;
-        const totalAmount = parseFloat(document.getElementById('billTotal').innerText.slice(4));
+        const itemId = document.getElementById('itemId').value;
+        const qty = parseInt(document.getElementById('qty').value, 10) || 0;
+        const unitPrice = parseFloat(document.getElementById('itemPrice').value) || 0;
+        const discount = parseFloat(document.getElementById('discount').value) || 0;
+        const discountBeforePrice = qty * unitPrice;
+        const totalAmount = discountBeforePrice - (discountBeforePrice * discount / 100);
 
-        if (!accountNo) {
-            alert('Please select a customer!');
+        if (!accountNo || !itemId) {
+            alert('Please select a customer and an item!');
             return;
         }
 
-        const bill = { billId, billDate, accountNo, totalAmount };
+        const bill = { billId, billDate, accountNo, itemId, qty, unitPrice, discount, totalAmount };
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'http://localhost:8081/PahanaEduBillingSystem/BillModel', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -340,6 +427,134 @@
         };
         xhr.send(JSON.stringify(bill));
     }
+
+    function findBillRow(billId) {
+        const rows = document.querySelectorAll('#billTable tr');
+        for (const row of rows) {
+            const idCell = row.cells[0];
+            if (idCell && idCell.textContent.trim() === billId) return row;
+        }
+        return null;
+    }
+
+    function printBill(billId) {
+        const row = findBillRow(billId);
+        if (!row) return alert('Bill not found to print');
+        const data = {
+            billId: row.cells[0].textContent,
+            billDate: row.cells[1].textContent,
+            accountNo: row.cells[2].textContent,
+            itemId: row.cells[3].textContent,
+            qty: row.cells[4].textContent,
+            unitPrice: row.cells[5].textContent,
+            discount: row.cells[6].textContent,
+            totalAmount: row.cells[7].textContent
+        };
+        const w = window.open('', '_blank');
+        w.document.write('<html><head><title>Bill ' + data.billId + '</title></head><body>');
+        w.document.write('<h2>Bill</h2>');
+        w.document.write('<p><strong>Bill ID:</strong> ' + data.billId + '</p>');
+        w.document.write('<p><strong>Date:</strong> ' + data.billDate + '</p>');
+        w.document.write('<p><strong>Customer ID:</strong> ' + data.accountNo + '</p>');
+        w.document.write('<p><strong>Item ID:</strong> ' + data.itemId + '</p>');
+        w.document.write('<p><strong>Qty:</strong> ' + data.qty + '</p>');
+        w.document.write('<p><strong>Unit Price:</strong> ' + data.unitPrice + '</p>');
+        w.document.write('<p><strong>Discount:</strong> ' + data.discount + '%</p>');
+        w.document.write('<h3>Total: Rs. ' + Number(data.totalAmount).toFixed(2) + '</h3>');
+        w.document.write('</body></html>');
+        w.document.close();
+        w.focus();
+        w.print();
+        w.close();
+    }
+
+    function editBill(billId, accountNo, itemId, qty, unitPrice, discount) {
+        document.getElementById('billId').value = billId;
+        const cusSel = document.getElementById('billCusId');
+        cusSel.value = accountNo;
+        const itemSel = document.getElementById('itemId');
+        itemSel.value = itemId;
+        document.getElementById('qty').value = qty;
+        document.getElementById('itemPrice').value = parseFloat(unitPrice).toFixed(2);
+        document.getElementById('discount').value = discount;
+        calculateTotal();
+        document.getElementById('generateBtn').style.display = 'none';
+        document.getElementById('updateBtn').style.display = 'inline-block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function updateBill() {
+        const billId = document.getElementById('billId').value;
+        if (!billId) {
+            alert('No Bill ID selected for update');
+            return;
+        }
+        const billDate = document.getElementById('billDate').value;
+        const accountNo = document.getElementById('billCusId').value;
+        const itemId = document.getElementById('itemId').value;
+        const qty = parseInt(document.getElementById('qty').value, 10) || 0;
+        const unitPrice = parseFloat(document.getElementById('itemPrice').value) || 0;
+        const discount = parseFloat(document.getElementById('discount').value) || 0;
+        const totalAmount = (qty * unitPrice) - ((qty * unitPrice) * discount / 100);
+
+        if (!accountNo || !itemId) {
+            alert('Please select a customer and an item!');
+            return;
+        }
+
+        const bill = { billId, billDate, accountNo, itemId, qty, unitPrice, discount, totalAmount };
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', 'http://localhost:8081/PahanaEduBillingSystem/BillModel', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 && xhr.responseText === 'updated') {
+                    alert('Bill Updated Successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Error updating bill!');
+                }
+            }
+        };
+        xhr.send(JSON.stringify(bill));
+    }
+
+    function deleteBill(billId) {
+        if (!confirm('Are you sure you want to delete bill ' + billId + '?')) return;
+        const xhr = new XMLHttpRequest();
+        xhr.open('DELETE', 'http://localhost:8081/PahanaEduBillingSystem/BillModel?bill_id=' + encodeURIComponent(billId), true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200 && xhr.responseText === 'deleted') {
+                    alert('Bill Deleted Successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Error deleting bill!');
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    function searchBill() {
+        const filter = document.getElementById('searchInput').value.toLowerCase();
+        const table = document.getElementById('billTable');
+        const rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            const billId = rows[i].cells[0].innerText.toLowerCase();
+            if (billId.includes(filter)) {
+                rows[i].style.display = '';
+            } else {
+                rows[i].style.display = 'none';
+            }
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function(e) {
+        // Live filter; Enter key also supported implicitly
+        searchBill();
+    });
 </script>
 </body>
 </html>

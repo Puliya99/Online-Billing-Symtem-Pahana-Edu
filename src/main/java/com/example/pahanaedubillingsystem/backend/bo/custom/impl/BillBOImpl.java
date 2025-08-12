@@ -14,14 +14,24 @@ public class BillBOImpl implements BillBO {
 
     @Override
     public boolean saveBill(BillDTO dto) throws SQLException {
-        return billDAO.save(new Bill(dto.getBillId(), dto.getBillDate(), dto.getAccountNo(), dto.getTotalAmount()));
+        return billDAO.save(new Bill(dto.getBillId(), dto.getBillDate(), dto.getAccountNo(), dto.getItemId(), dto.getQty(), dto.getUnitPrice(), dto.getDiscount(), dto.getTotalAmount()));
+    }
+
+    @Override
+    public boolean updateBill(BillDTO dto) throws SQLException {
+        return billDAO.update(new Bill(dto.getBillId(), dto.getBillDate(), dto.getAccountNo(), dto.getItemId(), dto.getQty(), dto.getUnitPrice(), dto.getDiscount(), dto.getTotalAmount()));
+    }
+
+    @Override
+    public boolean deleteBill(String billId) throws SQLException {
+        return billDAO.delete(billId);
     }
 
     @Override
     public BillDTO searchBill(String billId) throws SQLException {
         Bill bill = billDAO.search(billId);
         if (bill != null) {
-            return new BillDTO(bill.getBillId(), bill.getBillDate(), bill.getAccountNo(), bill.getTotalAmount());
+            return new BillDTO(bill.getBillId(), bill.getBillDate(), bill.getAccountNo(), bill.getItemId(), bill.getQty(), bill.getUnitPrice(), bill.getDiscount(), bill.getTotalAmount());
         }
         return null;
     }
@@ -31,7 +41,7 @@ public class BillBOImpl implements BillBO {
         List<BillDTO> bills = new ArrayList<>();
         List<Bill> all = billDAO.getAll();
         for (Bill b : all) {
-            bills.add(new BillDTO(b.getBillId(), b.getBillDate(), b.getAccountNo(), b.getTotalAmount()));
+            bills.add(new BillDTO(b.getBillId(), b.getBillDate(), b.getAccountNo(), b.getItemId(), b.getQty(), b.getUnitPrice(), b.getDiscount(), b.getTotalAmount()));
         }
         return bills;
     }
@@ -45,7 +55,7 @@ public class BillBOImpl implements BillBO {
     public BillDTO searchByIdBill(String billId) throws SQLException {
         Bill bill = billDAO.searchById(billId);
         if (bill != null) {
-            return new BillDTO(bill.getBillId(), bill.getBillDate(), bill.getAccountNo(), bill.getTotalAmount());
+            return new BillDTO(bill.getBillId(), bill.getBillDate(), bill.getAccountNo(), bill.getItemId(), bill.getQty(), bill.getUnitPrice(), bill.getDiscount(), bill.getTotalAmount());
         }
         return null;
     }

@@ -5,11 +5,11 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.example.pahanaedubillingsystem.backend.bo.BOFactory;
 import com.example.pahanaedubillingsystem.backend.bo.custom.BillBO;
 import com.example.pahanaedubillingsystem.backend.dto.BillDTO;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +47,33 @@ public class BillController extends HttpServlet {
         } catch (Exception e) {
             logger.error("Bill Not Saved", e);
             resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error saving bill");
+        }
+    }
+
+    @Override
+    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            objectMapper.registerModule(new JavaTimeModule());
+            BillDTO bill = objectMapper.readValue(req.getInputStream(), BillDTO.class);
+            boolean isUpdated = billBO.updateBill(bill);
+            resp.getWriter().write(isUpdated ? "updated" : "not updated");
+            logger.info(isUpdated ? "Bill Updated" : "Bill Not Updated");
+        } catch (Exception e) {
+            logger.error("Bill Not Updated", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error updating bill");
+        }
+    }
+
+    @Override
+    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            String billId = req.getParameter("bill_id");
+            boolean isDeleted = billBO.deleteBill(billId);
+            resp.getWriter().write(isDeleted ? "deleted" : "not deleted");
+            logger.info(isDeleted ? "Bill Deleted" : "Bill Not Deleted");
+        } catch (Exception e) {
+            logger.error("Bill Not Deleted", e);
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Error deleting bill");
         }
     }
 }
