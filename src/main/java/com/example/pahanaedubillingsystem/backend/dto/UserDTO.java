@@ -1,12 +1,22 @@
 package com.example.pahanaedubillingsystem.backend.dto;
 
+import com.example.pahanaedubillingsystem.backend.constant.Role;
+
 public class UserDTO {
     private String username;
     private String password;
+    private Role role;
+
 
     public UserDTO(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+    public UserDTO(String username, String password, Role role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
     }
 
     public UserDTO() {
@@ -28,11 +38,20 @@ public class UserDTO {
         this.password = password;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Override
     public String toString() {
         return "UserDTO{" +
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
+                ", role=" + role +
                 '}';
     }
 }
