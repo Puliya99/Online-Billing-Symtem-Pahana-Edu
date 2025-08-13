@@ -10,28 +10,52 @@ import java.util.List;
 
 public class BillDAOImpl implements BillDAO {
     private static final String GET_BILLS = "SELECT * FROM bills";
-    private static final String SAVE_BILL = "INSERT INTO bills (bill_id, account_no, total_amount, bill_date) VALUES (?, ?, ?, ?)";
+    private static final String SAVE_BILL = "INSERT INTO bills (bill_id, account_no, item_id, qty, unit_price, discount, total_amount, bill_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_BILL = "UPDATE bills SET account_no = ?, item_id = ?, qty = ?, unit_price = ?, discount = ?, total_amount = ?, bill_date = ? WHERE bill_id = ?";
+    private static final String DELETE_BILL = "DELETE FROM bills WHERE bill_id = ?";
 
     @Override
     public boolean save(Bill entity) throws SQLException {
-        return SQLUtil.execute(SAVE_BILL, entity.getBillId(), entity.getAccountNo(), entity.getTotalAmount(), entity.getBillDate());
+        java.sql.Date sqlDate = (entity.getBillDate() != null) ? new java.sql.Date(entity.getBillDate().getTime()) : null;
+        return SQLUtil.execute(
+                SAVE_BILL,
+                entity.getBillId(),
+                entity.getAccountNo(),
+                entity.getItemId(),
+                entity.getQty(),
+                entity.getUnitPrice(),
+                entity.getDiscount(),
+                entity.getTotalAmount(),
+                sqlDate
+        );
     }
 
     @Override
     public boolean update(Bill entity) throws SQLException {
-        throw new UnsupportedOperationException("Bill update not implemented");
+        java.sql.Date sqlDate = (entity.getBillDate() != null) ? new java.sql.Date(entity.getBillDate().getTime()) : null;
+        return SQLUtil.execute(
+                UPDATE_BILL,
+                entity.getAccountNo(),
+                entity.getItemId(),
+                entity.getQty(),
+                entity.getUnitPrice(),
+                entity.getDiscount(),
+                entity.getTotalAmount(),
+                sqlDate,
+                entity.getBillId()
+        );
     }
 
     @Override
     public boolean delete(String billId) throws SQLException {
-        throw new UnsupportedOperationException("Bill deletion not implemented");
+        return SQLUtil.execute(DELETE_BILL, billId);
     }
 
     @Override
     public Bill search(String billId) throws SQLException {
         ResultSet rst = SQLUtil.execute("SELECT * FROM bills WHERE bill_id = ?", billId);
         if (rst.next()) {
-            return new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getDouble("total_amount"));
+            return new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("item_id"), rst.getInt("qty"), rst.getDouble("unit_price"), rst.getInt("discount"), rst.getDouble("total_amount"));
         }
         return null;
     }
@@ -41,7 +65,7 @@ public class BillDAOImpl implements BillDAO {
         List<Bill> bills = new ArrayList<>();
         ResultSet rst = SQLUtil.execute(GET_BILLS);
         while (rst.next()) {
-            bills.add(new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getDouble("total_amount")));
+            bills.add(new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("item_id"), rst.getInt("qty"), rst.getDouble("unit_price"), rst.getInt("discount"), rst.getDouble("total_amount")));
         }
         return bills;
     }
@@ -60,7 +84,7 @@ public class BillDAOImpl implements BillDAO {
     public Bill searchById(String billId) throws SQLException {
         ResultSet rst = SQLUtil.execute("SELECT * FROM bills WHERE bill_id = ?", billId);
         if (rst.next()) {
-            return new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getDouble("total_amount"));
+            return new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("item_id"), rst.getInt("qty"), rst.getDouble("unit_price"), rst.getInt("discount"), rst.getDouble("total_amount"));
         }
         return null;
     }

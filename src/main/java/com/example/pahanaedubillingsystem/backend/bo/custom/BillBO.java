@@ -7,6 +7,8 @@ import java.util.List;
 
 public interface BillBO extends SuperBO {
     boolean saveBill(BillDTO dto) throws SQLException;
+    boolean updateBill(BillDTO dto) throws SQLException;
+    boolean deleteBill(String billId) throws SQLException;
     BillDTO searchBill(String billId) throws SQLException;
     List<BillDTO> getAllBills() throws SQLException;
     List<String> getBillIds() throws SQLException;
