@@ -2,6 +2,7 @@ package com.example.pahanaedubillingsystem.backend.bo.custom.impl;
 
 import com.example.pahanaedubillingsystem.backend.bo.custom.VendorBO;
 import com.example.pahanaedubillingsystem.backend.dao.DAOFactory;
+import com.example.pahanaedubillingsystem.backend.dao.SQLUtil;
 import com.example.pahanaedubillingsystem.backend.dao.custom.VendorDAO;
 import com.example.pahanaedubillingsystem.backend.dto.VendorDTO;
 import com.example.pahanaedubillingsystem.backend.entity.Vendor;
@@ -13,7 +14,10 @@ public class VendorBOImpl implements VendorBO {
     private final VendorDAO vendorDAO = (VendorDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.VENDOR);
     @Override
     public boolean saveVendor(VendorDTO dto) throws SQLException {
-        return vendorDAO.save(new Vendor(dto.getGrnId(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
+        boolean saved = vendorDAO.save(new Vendor(dto.getGrnId(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
+        if (!saved) return false;
+        Boolean updated = SQLUtil.execute("UPDATE items SET qty = qty + ? WHERE item_id = ?", dto.getQty(), dto.getItemId());
+        return Boolean.TRUE.equals(updated);
     }
 
     @Override
