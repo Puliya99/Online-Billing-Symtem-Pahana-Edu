@@ -274,8 +274,8 @@
       alert('Please enter a valid price!');
       return false;
     }
-    if (!qty || qty <= 0) {
-      alert('Please enter a valid quantity!');
+    if (Number.isNaN(qty) || qty < 0) {
+      alert('Please enter a valid quantity (0 or greater)!');
       return false;
     }
     return true;

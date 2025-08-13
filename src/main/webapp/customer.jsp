@@ -424,7 +424,6 @@
     setTimeout(loadId, 10);
   }
 
-  // Search Function
   function searchCustomer() {
     const filter = document.getElementById('searchInput').value.toLowerCase();
     const table = document.getElementById('cusTable');
