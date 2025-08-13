@@ -77,7 +77,7 @@
             background: white;
             border-radius: 0.35rem;
             box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
-            padding: 1.5rem;
+            padding: 3rem;
         }
         .card-header {
             background-color: #f8f9fc;
@@ -133,13 +133,17 @@
             flex-wrap: wrap;
             gap: 1rem;
         }
+        .col-md-2{
+            flex: 1;
+            min-width: 250px;
+        }
         .col-md-3 {
             flex: 1;
-            min-width: 200px;
+            min-width: 300px;
         }
         .col-md-4 {
             flex: 1.33;
-            min-width: 200px;
+            min-width: 320px;
         }
         .col-md-6 {
             flex: 2;
@@ -182,7 +186,7 @@
                 <h5><i class="fas fa-user-tag"></i> Customer & Item Details</h5>
             </div>
             <div class="card-body">
-                <div class="row">
+                <div class="row" style="margin-top: 30px">
                     <div class="col-md-3">
                         <div class="form-group">
                             <label for="billCusId">Customer ID</label>
@@ -204,7 +208,7 @@
                             <input type="text" class="form-control" id="billCusName" disabled>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3" style="margin-left: 30px">
                         <div class="form-group">
                             <label for="itemId">Item ID</label>
                             <select id="itemId" class="form-select" onchange="loadItemDetails()">
@@ -219,25 +223,27 @@
                             </select>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-4">
                         <div class="form-group">
                             <label for="itemName">Item Description</label>
                             <input type="text" class="form-control" id="itemName" disabled>
                         </div>
                     </div>
+                </div>
+                <div class="row">
                     <div class="col-md-2">
                         <div class="form-group">
                             <label for="itemPrice">Item Price</label>
                             <input type="text" class="form-control" id="itemPrice" disabled>
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2" style="margin-left: 30px">
                         <div class="form-group">
                             <label for="qty">Qty</label>
                             <input type="number" class="form-control" id="qty" oninput="calculateTotal()">
                         </div>
                     </div>
-                    <div class="col-md-2">
+                    <div class="col-md-2" style="margin-left: 30px">
                         <div class="form-group">
                             <label for="discount">Discount</label>
                             <input type="number" class="form-control" id="discount" oninput="calculateTotal()">
@@ -270,10 +276,17 @@
             <div class="card-header">
                 <h5><i class="fas fa-history"></i> Bill History</h5>
             </div>
-            <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
-                <input type="text" id="searchInput" class="form-control" placeholder="Search by Bill Id" style="flex: 1;">
+            <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search by Bill Id" style="flex: 1; min-width: 200px;">
+                <div class="input-group" style="flex: 0 1 auto; min-width: 220px;">
+                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                    <input type="date" id="billDateFilter" class="form-control" placeholder="Filter by Date">
+                </div>
                 <button type="button" class="btn btn-primary" onclick="searchBill()">
                     <i class="fas fa-search"></i> Search
+                </button>
+                <button type="button" class="btn" style="background-color:#858796" onclick="clearFilters()">
+                    <i class="fas fa-times"></i> Clear
                 </button>
             </div>
             <div class="card-body">
@@ -452,6 +465,7 @@
         };
         const w = window.open('', '_blank');
         w.document.write('<html><head><title>Bill ' + data.billId + '</title></head><body>');
+        w.document.write('<h1>Pahana Edu</h1>');
         w.document.write('<h2>Bill</h2>');
         w.document.write('<p><strong>Bill ID:</strong> ' + data.billId + '</p>');
         w.document.write('<p><strong>Date:</strong> ' + data.billDate + '</p>');
@@ -536,24 +550,39 @@
         xhr.send();
     }
 
-    function searchBill() {
-        const filter = document.getElementById('searchInput').value.toLowerCase();
+    function applyTableFilters() {
+        const textFilter = document.getElementById('searchInput').value.toLowerCase().trim();
+        const dateFilter = (document.getElementById('billDateFilter').value || '').trim();
         const table = document.getElementById('billTable');
         const rows = table.getElementsByTagName('tr');
 
         for (let i = 0; i < rows.length; i++) {
             const billId = rows[i].cells[0].innerText.toLowerCase();
-            if (billId.includes(filter)) {
-                rows[i].style.display = '';
-            } else {
-                rows[i].style.display = 'none';
-            }
+            const billDateRaw = rows[i].cells[1].innerText.trim();
+            const billDate = billDateRaw;
+
+            const matchesText = !textFilter || billId.includes(textFilter);
+            const matchesDate = !dateFilter || billDate === dateFilter;
+
+            rows[i].style.display = (matchesText && matchesDate) ? '' : 'none';
         }
     }
 
-    document.getElementById('searchInput').addEventListener('keyup', function(e) {
-        // Live filter; Enter key also supported implicitly
-        searchBill();
+    function searchBill() {
+        applyTableFilters();
+    }
+
+    function clearFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('billDateFilter').value = '';
+        applyTableFilters();
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        applyTableFilters();
+    });
+    document.getElementById('billDateFilter').addEventListener('change', function() {
+        applyTableFilters();
     });
 </script>
 </body>
