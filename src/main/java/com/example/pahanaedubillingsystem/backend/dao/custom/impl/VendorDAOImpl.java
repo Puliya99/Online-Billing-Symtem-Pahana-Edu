@@ -1,7 +1,7 @@
 package com.example.pahanaedubillingsystem.backend.dao.custom.impl;
 
-import com.example.pahanaedubillingsystem.backend.dao.CrudDAO;
 import com.example.pahanaedubillingsystem.backend.dao.SQLUtil;
+import com.example.pahanaedubillingsystem.backend.dao.custom.VendorDAO;
 import com.example.pahanaedubillingsystem.backend.entity.Vendor;
 
 import java.sql.ResultSet;
@@ -9,7 +9,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VendorDAOImpl implements CrudDAO {
+public class VendorDAOImpl implements VendorDAO {
 
     private static final String GET_VENDORS = "SELECT * FROM vendors";
     private static final String SAVE_VENDORS = "INSERT INTO vendors (grn_id, name, item_id, description, qty, buying_price) VALUES (?, ?, ?, ?, ?, ?)";
@@ -23,7 +23,13 @@ public class VendorDAOImpl implements CrudDAO {
 
     @Override
     public boolean update(Vendor entity) throws SQLException {
-        return SQLUtil.execute(UPDATE_VENDORS, entity.getGrnId(), entity.getName(), entity.getItemId(), entity.getDescription(), entity.getQty(), entity.getBuyingPrice());
+        return SQLUtil.execute(UPDATE_VENDORS,
+                entity.getName(),
+                entity.getItemId(),
+                entity.getDescription(),
+                entity.getQty(),
+                entity.getBuyingPrice(),
+                entity.getGrnId());
     }
 
     @Override
