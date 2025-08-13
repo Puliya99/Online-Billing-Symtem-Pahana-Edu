@@ -95,7 +95,8 @@ USE PahanaEduBillingSystem;
 
 CREATE TABLE users (
     username VARCHAR(50) PRIMARY KEY,
-    password VARCHAR(255) NOT NULL
+    password VARCHAR(255) NOT NULL,
+    role ENUM('Admin', 'User')
 );
 
 CREATE TABLE customers (
@@ -113,12 +114,27 @@ CREATE TABLE items (
     qty INT
 );
 
+CREATE TABLE vendor (
+    grn_id VARCHAR(10) PRIMARY KEY,
+    name VARCHAR(100),
+    item_id VARCHAR(10),
+    description VARCHAR(255),
+    qty INT,
+    buying_price DOUBLE,
+    FOREIGN KEY (item_id) REFERENCES items(item_id)
+);
+
 CREATE TABLE bills (
     bill_id VARCHAR(10) PRIMARY KEY,
     account_no VARCHAR(10),
+    item_id VARCHAR(10),
+    qty INT,
+    unit_price DOUBLE,
+    discount INT,
     total_amount DOUBLE,
     bill_date DATE,
-    FOREIGN KEY (account_no) REFERENCES customers(account_no)
+    FOREIGN KEY (account_no) REFERENCES customers(account_no),
+    FOREIGN KEY (item_id) REFERENCES items(item_id)
 );
 ```
 
