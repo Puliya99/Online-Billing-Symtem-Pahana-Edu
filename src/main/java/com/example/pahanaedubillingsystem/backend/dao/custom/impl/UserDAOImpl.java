@@ -1,5 +1,6 @@
 package com.example.pahanaedubillingsystem.backend.dao.custom.impl;
 
+import com.example.pahanaedubillingsystem.backend.constant.Role;
 import com.example.pahanaedubillingsystem.backend.dao.SQLUtil;
 import com.example.pahanaedubillingsystem.backend.dao.custom.UserDAO;
 import com.example.pahanaedubillingsystem.backend.entity.User;
@@ -10,29 +11,33 @@ import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
     private static final String GET_USERS = "SELECT * FROM users";
-    private static final String SAVE_USER = "INSERT INTO users (username, password) VALUES (?, ?)";
+    private static final String SAVE_USER = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
+    private static final String UPDATE_USER = "UPDATE users SET username = ?, password = ?, role = ? WHERE username = ?";
+    private static final String DELETE_USER = "DELETE FROM users WHERE username = ?";
     private static final String VALIDATE_USER = "SELECT * FROM users WHERE username = ? AND password = ?";
 
     @Override
     public boolean save(User entity) throws SQLException {
-        return SQLUtil.execute(SAVE_USER, entity.getUsername(), entity.getPassword());
+        return SQLUtil.execute(SAVE_USER, entity.getUsername(), entity.getPassword(), entity.getRole() != null ? entity.getRole().name() : null);
     }
 
     @Override
     public boolean update(User entity) throws SQLException {
-        throw new UnsupportedOperationException("User update not implemented");
+        return SQLUtil.execute(UPDATE_USER, entity.getUsername(), entity.getPassword(), entity.getRole() != null ? entity.getRole().name() : null, entity.getUsername());
     }
 
     @Override
     public boolean delete(String username) throws SQLException {
-        throw new UnsupportedOperationException("User deletion not implemented");
+        return SQLUtil.execute(DELETE_USER, username);
     }
 
     @Override
     public User search(String username) throws SQLException {
         ResultSet rst = SQLUtil.execute("SELECT * FROM users WHERE username = ?", username);
         if (rst.next()) {
-            return new User(rst.getString("username"), rst.getString("password"));
+            String roleStr = rst.getString("role");
+            Role role = roleStr != null ? Role.valueOf(roleStr) : null;
+            return new User(rst.getString("username"), rst.getString("password"), role);
         }
         return null;
     }
@@ -42,7 +47,9 @@ public class UserDAOImpl implements UserDAO {
         List<User> users = new ArrayList<>();
         ResultSet rst = SQLUtil.execute(GET_USERS);
         while (rst.next()) {
-            users.add(new User(rst.getString("username"), rst.getString("password")));
+            String roleStr = rst.getString("role");
+            Role role = roleStr != null ? Role.valueOf(roleStr) : null;
+            users.add(new User(rst.getString("username"), rst.getString("password"), role));
         }
         return users;
     }
@@ -61,7 +68,9 @@ public class UserDAOImpl implements UserDAO {
     public User searchById(String username) throws SQLException {
         ResultSet rst = SQLUtil.execute("SELECT * FROM users WHERE username = ?", username);
         if (rst.next()) {
-            return new User(rst.getString("username"), rst.getString("password"));
+            String roleStr = rst.getString("role");
+            Role role = roleStr != null ? Role.valueOf(roleStr) : null;
+            return new User(rst.getString("username"), rst.getString("password"), role);
         }
         return null;
     }

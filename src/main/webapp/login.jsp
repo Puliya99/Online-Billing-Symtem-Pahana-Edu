@@ -130,7 +130,7 @@
 
         const user = { username, password };
         const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost:8081/PahanaEduBillingSystem/UserModel', true);
+        xhr.open('POST', 'http://localhost:8081/PahanaEduBillingSystem/AuthModel', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4) {
