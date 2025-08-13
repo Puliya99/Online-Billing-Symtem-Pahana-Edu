@@ -372,7 +372,6 @@
         rowIndex = null;
     }
 
-    // Search Function
     function searchUser() {
         const filter = document.getElementById('searchInput').value.toLowerCase();
         const table = document.getElementById('userTable');
