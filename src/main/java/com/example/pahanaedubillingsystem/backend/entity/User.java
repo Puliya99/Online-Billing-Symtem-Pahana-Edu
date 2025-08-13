@@ -1,12 +1,21 @@
 package com.example.pahanaedubillingsystem.backend.entity;
 
+import com.example.pahanaedubillingsystem.backend.constant.Role;
+
 public class User {
     private String username;
     private String password;
+    private Role role;
 
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+    public User(String username, String password, Role role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
     }
 
     public User() {
@@ -28,11 +37,20 @@ public class User {
         this.password = password;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
+                ", role=" + role +
                 '}';
     }
 }
