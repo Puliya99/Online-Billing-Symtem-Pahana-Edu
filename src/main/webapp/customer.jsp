@@ -211,11 +211,15 @@
   <div class="data-card">
     <h4><i class="fas fa-list"></i> Customer List</h4>
 
-    <!-- Search Bar -->
-    <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
-      <input type="text" id="searchInput" class="form-control" placeholder="Search by Name or Account No" style="flex: 1;">
-      <button type="button" class="btn btn-primary" onclick="searchCustomer()">
+    <!-- Search & Import Bar -->
+    <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search by Name or Account No" style="flex: 1; min-width: 200px;">
+      <button type="button" class="btn btn-primary" onclick="searchCustomer()" title="Search">
         <i class="fas fa-search"></i> Search
+      </button>
+      <input type="file" id="customerCsvInput" accept=".csv" style="display:none" />
+      <button type="button" class="btn btn-success" onclick="document.getElementById('customerCsvInput').click()" title="Import Customers from CSV">
+        <i class="fas fa-file-import"></i> Import
       </button>
     </div>
 
@@ -325,7 +329,7 @@
   }
 
   function selectCustomer(id, name, address, contact, units) {
-    console.log('Selecting customer:', id, name, address, contact, units); // Debug log
+    console.log('Selecting customer:', id, name, address, contact, units);
 
     document.getElementById('cusId').value = id;
     document.getElementById('cusName').value = name;
@@ -448,3 +452,45 @@
 </script>
 </body>
 </html>
+
+<script>
+  (function(){
+    const input = document.getElementById('customerCsvInput');
+    if (input) {
+      input.addEventListener('change', function(){
+        if (!this.files || this.files.length === 0) return;
+        const file = this.files[0];
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+          alert('Please select a .csv file');
+          this.value = '';
+          return;
+        }
+        if (!confirm('Import customers from file: ' + file.name + '?')) {
+          this.value = '';
+          return;
+        }
+        uploadCustomerCsv(file);
+      });
+    }
+  })();
+
+  function uploadCustomerCsv(file) {
+    const btns = document.querySelectorAll('button');
+    btns.forEach(b => b.disabled = true);
+    const fd = new FormData();
+    fd.append('file', file);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://localhost:8081/PahanaEduBillingSystem/CustomerImport', true);
+    xhr.onreadystatechange = function(){
+      if (xhr.readyState === 4) {
+        btns.forEach(b => b.disabled = false);
+        const msg = xhr.responseText || ('Status: ' + xhr.status);
+        alert('Import result:\n\n' + msg);
+        if (xhr.status === 200) {
+          window.location.reload();
+        }
+      }
+    };
+    xhr.send(fd);
+  }
+</script>
