@@ -270,8 +270,8 @@
     <ul id="mainNav" class="nav-list">
         <li><a id="dashboard" class="nav-link" href="dashboard.jsp"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
         <li><a id="customer" class="nav-link" href="customer.jsp"><i class="fas fa-users"></i>Customer</a></li>
-        <li><a id="vendor" class="nav-link" href="vendor.jsp"><i class="fas fa-truck"></i>Vendor</a></li>
         <li><a id="item" class="nav-link" href="item.jsp"><i class="fas fa-box-open"></i>Item</a></li>
+        <li><a id="vendor" class="nav-link" href="vendor.jsp"><i class="fas fa-truck"></i>Vendor</a></li>
         <li><a id="bill" class="nav-link" href="bill.jsp"><i class="fas fa-file-invoice-dollar"></i>Bill</a></li>
         <% if (role != null && role.equalsIgnoreCase("admin")) { %>
         <li><a id="user" class="nav-link" href="user.jsp"><i class="fas fa-user"></i>User</a></li>
