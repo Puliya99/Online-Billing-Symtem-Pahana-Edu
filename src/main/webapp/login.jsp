@@ -89,6 +89,34 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(78, 115, 223, 0.3);
         }
+    
+        /* Dark mode overrides */
+        body.dark-mode {
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+        .dark-mode .login-card {
+            background: #1f1f1f;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        }
+        .dark-mode .form-control {
+            background-color: #262626;
+            color: #e0e0e0;
+            border-color: #3a3a3a;
+        }
+        .dark-mode .form-control:focus {
+            border-color: #4e73df;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        }
+        .dark-mode .input-group-text {
+            background-color: #262626;
+            border-color: #3a3a3a;
+            color: #d0d0d0;
+        }
+        .dark-mode .btn:hover {
+            box-shadow: 0 4px 15px rgba(78, 115, 223, 0.35);
+        }
     </style>
 </head>
 <body>
@@ -119,6 +147,15 @@
     </div>
 </section>
 <script>
+    (function(){
+        try {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+            }
+        } catch (e) {
+        }
+    })();
     function login() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;

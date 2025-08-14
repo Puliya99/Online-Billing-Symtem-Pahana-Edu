@@ -133,6 +133,83 @@
         color: #4e73df;
         background-color: rgba(78, 115, 223, 0.2);
     }
+
+    /* Dark mode extensions for app UI */
+    .dark-mode .container {
+        color: #e0e0e0;
+    }
+    .dark-mode .section-header {
+        border-bottom-color: #3a3a3a;
+    }
+    .dark-mode .section-header h2 {
+        color: #e0e0e0;
+    }
+    .dark-mode .section-header p {
+        color: #b0b0b0;
+    }
+    /* Cards and panels */
+    .dark-mode .stat-card,
+    .dark-mode .form-card,
+    .dark-mode .data-card,
+    .dark-mode .card {
+        background: #2b2b2b;
+        color: #e0e0e0;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.3);
+        border-color: #3a3a3a;
+    }
+    .dark-mode .stat-info p { color: #b0b0b0; }
+    .dark-mode .stat-card:hover { box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.4); }
+
+    /* Tables */
+    .dark-mode .table { color: #e0e0e0; }
+    .dark-mode .table th,
+    .dark-mode .table td { border-color: #3a3a3a; }
+    .dark-mode .table tbody tr:hover { background-color: rgba(78, 115, 223, 0.08); }
+
+    /* Forms */
+    .dark-mode .form-control {
+        background-color: #1f1f1f;
+        color: #e0e0e0;
+        border-color: #3a3a3a;
+    }
+    .dark-mode .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+        outline: none;
+    }
+    .dark-mode .input-group-text {
+        background-color: #262626;
+        color: #d0d0d0;
+        border-color: #3a3a3a;
+    }
+
+    /* Buttons - keep brand color but tweak hover shadow */
+    .dark-mode .btn:hover { box-shadow: 0 4px 15px rgba(78, 115, 223, 0.35); }
+
+    /* Alerts */
+    .dark-mode .alert {
+        color: #e0e0e0;
+        background-color: #2b2b2b;
+        border-color: #3a3a3a;
+    }
+    .dark-mode .alert-warning {
+        color: #ffe08a;
+        background-color: rgba(255, 193, 7, 0.15);
+        border-color: rgba(255, 193, 7, 0.3);
+    }
+
+    /* Accordion */
+    .dark-mode .accordion-button {
+        background-color: #262626;
+        border-color: #3a3a3a;
+        color: #e0e0e0;
+    }
+    .dark-mode .accordion-button:hover { background-color: rgba(78, 115, 223, 0.15); }
+    .dark-mode .accordion-content {
+        background-color: #1f1f1f;
+        border-color: #3a3a3a;
+        color: #dcdcdc;
+    }
 </style>
 <nav class="navbar">
     <div style="display: flex; align-items: center;">
