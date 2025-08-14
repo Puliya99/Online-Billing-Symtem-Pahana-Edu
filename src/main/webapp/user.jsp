@@ -7,6 +7,21 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List, com.example.pahanaedubillingsystem.backend.dto.UserDTO, com.example.pahanaedubillingsystem.backend.bo.BOFactory, com.example.pahanaedubillingsystem.backend.bo.custom.UserBO" %>
+<%
+    if (session.getAttribute("username") == null) {
+        response.sendRedirect("login.jsp");
+        return;
+    }
+    String _role = null;
+    Object _roleAttr = session.getAttribute("role");
+    if (_roleAttr != null) {
+        _role = _roleAttr.toString();
+    }
+    if (_role == null || !_role.equalsIgnoreCase("admin")) {
+        response.sendRedirect("dashboard.jsp");
+        return;
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>

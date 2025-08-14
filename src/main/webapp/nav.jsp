@@ -227,7 +227,9 @@
         <li><a id="vendor" class="nav-link" href="vendor.jsp"><i class="fas fa-truck"></i>Vendor</a></li>
         <li><a id="item" class="nav-link" href="item.jsp"><i class="fas fa-box-open"></i>Item</a></li>
         <li><a id="bill" class="nav-link" href="bill.jsp"><i class="fas fa-file-invoice-dollar"></i>Bill</a></li>
+        <% if (role != null && role.equalsIgnoreCase("admin")) { %>
         <li><a id="user" class="nav-link" href="user.jsp"><i class="fas fa-user"></i>User</a></li>
+        <% } %>
         <li><a id="help" class="nav-link" href="help.jsp"><i class="fas fa-question-circle"></i>Help</a></li>
         <div class="user-logo" onclick="toggleDropdown(event)">
             <%= username.charAt(0) %>
