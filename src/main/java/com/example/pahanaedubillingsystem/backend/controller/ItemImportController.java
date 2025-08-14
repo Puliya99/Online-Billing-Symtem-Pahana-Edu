@@ -146,7 +146,6 @@ public class ItemImportController extends HttpServlet {
         logger.info("Item CSV Import completed. Total: {}, Imported: {}, Skipped: {}", total, imported, skipped);
     }
 
-    // Simple CSV splitter supporting quoted fields
     private String[] splitCsv(String line) {
         java.util.List<String> fields = new java.util.ArrayList<>();
         StringBuilder current = new StringBuilder();
