@@ -225,11 +225,14 @@
     <div class="data-card">
         <h4><i class="fas fa-list"></i> Vendor List</h4>
 
-        <!-- Search Bar -->
-        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
-            <input type="text" id="searchInput" class="form-control" placeholder="Search by GRN ID or Vendor Name" style="flex: 1;">
-            <button type="button" class="btn btn-primary" onclick="searchVendor()">
+        <!-- Search & Export Bar -->
+        <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search by GRN ID or Vendor Name" style="flex: 1; min-width: 200px;">
+            <button type="button" class="btn btn-primary" onclick="searchVendor()" title="Search">
                 <i class="fas fa-search"></i> Search
+            </button>
+            <button type="button" class="btn btn-warning" onclick="exportVendorsCsv()" title="Export Vendors to CSV">
+                <i class="fas fa-file-export"></i> Export
             </button>
         </div>
 
@@ -456,6 +459,14 @@
         document.getElementById('deleteWarning').style.display = 'none';
         rowIndex = null;
         setTimeout(loadId, 10);
+    }
+
+    function exportVendorsCsv() {
+        try {
+            window.location.href = 'http://localhost:8081/PahanaEduBillingSystem/VendorExport';
+        } catch (e) {
+            alert('Failed to start export: ' + (e && e.message ? e.message : e));
+        }
     }
 
     function searchVendor() {
