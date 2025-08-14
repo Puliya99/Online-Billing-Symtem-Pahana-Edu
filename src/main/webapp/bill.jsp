@@ -54,6 +54,7 @@
             border: 1px solid #d1d3e2;
             padding: 0 1rem;
             width: 100%;
+            color: #1a1a1a;
         }
         .form-control:focus, .form-select:focus {
             border-color: #4e73df;
