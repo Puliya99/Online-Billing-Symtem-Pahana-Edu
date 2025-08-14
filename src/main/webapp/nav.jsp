@@ -260,6 +260,26 @@
         }
         .dark-mode .nav-list li { border-top-color: #3a3a3a; }
     }
+
+    /* Guidance UI */
+    .guide-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 2000; display: none; }
+    .guide-card {
+        position: fixed; right: 16px; bottom: 16px; max-width: 360px; z-index: 2001;
+        background: #ffffff; color: #333; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        padding: 16px; border: 1px solid #e3e6f0; font-size: 0.95rem;
+    }
+    .guide-card h4 { margin: 0 0 8px 0; font-size: 1.05rem; color: #4e73df; }
+    .guide-card ul { margin: 0 0 10px 18px; padding: 0; }
+    .guide-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .guide-btn { border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .guide-btn.primary { background: #4e73df; color: #fff; }
+    .guide-btn.light { background: #eef2ff; color: #4e73df; }
+    .guide-btn.muted { background: #f1f1f1; color: #555; }
+
+    .dark-mode .guide-card { background: #1f1f1f; color: #e0e0e0; border-color: #3a3a3a; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+    .dark-mode .guide-card h4 { color: #8fb1ff; }
+    .dark-mode .guide-btn.light { background: #2a334a; color: #cfe0ff; }
+    .dark-mode .guide-btn.muted { background: #333; color: #ddd; }
 </style>
 <nav class="navbar">
     <div style="display: flex; align-items: center;">
@@ -281,6 +301,7 @@
             <%= username.charAt(0) %>
             <div class="user-dropdown">
                 <a class="dropdown-item" href="#" onclick="toggleTheme(event)">Theme</a>
+                <a class="dropdown-item" href="#" onclick="startGuidance(true); return false;">Tips</a>
                 <a class="dropdown-item" href="logout.jsp">Logout</a>
             </div>
         </div>
@@ -353,6 +374,132 @@
         if (nav) nav.classList.remove('show');
     }
 
+    function getCurrentPageKey() {
+        const path = (location.pathname || '').toLowerCase();
+        if (path.endsWith('dashboard.jsp')) return 'dashboard';
+        if (path.endsWith('customer.jsp')) return 'customer';
+        if (path.endsWith('item.jsp')) return 'item';
+        if (path.endsWith('vendor.jsp')) return 'vendor';
+        if (path.endsWith('user.jsp')) return 'user';
+        if (path.endsWith('bill.jsp')) return 'bill';
+        if (path.endsWith('help.jsp')) return 'help';
+        return 'other';
+    }
+
+    const GUIDE_TIPS = {
+        dashboard: {
+            title: 'Welcome to your Dashboard',
+            bullets: [
+                'View key stats like total Customers, Items, and Bills at a glance.',
+                'Use the top navigation to switch between modules.',
+                'Switch Theme from the profile circle in the top-right.'
+            ]
+        },
+        customer: {
+            title: 'Customer Management Tips',
+            bullets: [
+                'Use the Customer Form to add or edit customer details.',
+                'Click a row in the table to load it into the form.',
+                'Use Search to quickly filter customers.',
+                'Import/Export CSV using the buttons above the table.'
+            ]
+        },
+        item: {
+            title: 'Item Management Tips',
+            bullets: [
+                'Add items with ID, Description, Price, and Quantity.',
+                'Select a row to edit; Update or Delete as needed.',
+                'Search, Import, and Export tools are available on top.'
+            ]
+        },
+        vendor: {
+            title: 'Vendor Management Tips',
+            bullets: [
+                'Record GRNs with item and quantity to update stock.',
+                'Pick an Item ID to auto-fill description.',
+                'Use Search and Export to manage vendor records.'
+            ]
+        },
+        user: {
+            title: 'User Management Tips',
+            bullets: [
+                'Only Admins can access this page.',
+                'Create, update, or remove system users and set roles.',
+                'Non-admin users cannot perform delete actions.'
+            ]
+        },
+        bill: {
+            title: 'Billing Tips',
+            bullets: [
+                'Select a customer and add items to generate bills.',
+                'Review bill history to track previous transactions.'
+            ]
+        },
+        help: {
+            title: 'Help Center',
+            bullets: [
+                'Browse FAQs and usage instructions.',
+                'Use the Theme toggle from profile to switch dark/light mode.'
+            ]
+        },
+        other: {
+            title: 'Quick Tips',
+            bullets: [
+                'Use the top navigation to switch sections.',
+                'Theme and Tips are available from the profile menu.'
+            ]
+        }
+    };
+
+    function buildGuideCard(title, bullets, controls) {
+        let overlay = document.querySelector('.guide-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.className = 'guide-overlay';
+            document.body.appendChild(overlay);
+        }
+        let card = document.querySelector('.guide-card');
+        if (!card) {
+            card = document.createElement('div');
+            card.className = 'guide-card';
+            document.body.appendChild(card);
+        }
+        const list = (bullets || []).map(b => '<li>' + b + '</li>').join('');
+        card.innerHTML = '<h4>' + title + '</h4>' +
+            '<ul>' + list + '</ul>' +
+            '<div class="guide-actions">' +
+            (controls || '') +
+            '</div>';
+        return { overlay, card };
+    }
+
+    function startGuidance(force) {
+        const userKey = (window.CURRENT_USERNAME || '').trim();
+        const page = getCurrentPageKey();
+        const onboardedKey = 'onboarded_' + userKey;
+        const pageSeenKey = 'guideSeen_' + userKey + '_' + page;
+        try {
+            if (!userKey) return;
+            if (!force && localStorage.getItem(onboardedKey)) return; // Already finished
+
+            const tip = GUIDE_TIPS[page] || GUIDE_TIPS.other;
+            const alreadySeenThisPage = localStorage.getItem(pageSeenKey);
+            if (!force && alreadySeenThisPage) return;
+
+            const controls = '' +
+                '<button class="guide-btn muted" onclick="(function(){ document.querySelector(\'.guide-overlay\').style.display=\'none\'; document.querySelector(\'.guide-card\').remove(); })()">Close</button>' +
+                '<button class="guide-btn light" onclick="(function(){ try{ localStorage.setItem(\'' + onboardedKey + '\', \'true\'); }catch(e){} var ov=document.querySelector(\'.guide-overlay\'); if(ov) ov.style.display=\'none\'; var c=document.querySelector(\'.guide-card\'); if(c) c.remove(); })()">Don\'t show again</button>' +
+                '<button class="guide-btn primary" onclick="(function(){ try{ localStorage.setItem(\'' + pageSeenKey + '\', \'true\'); }catch(e){} var ov=document.querySelector(\'.guide-overlay\'); if(ov) ov.style.display=\'none\'; var c=document.querySelector(\'.guide-card\'); if(c) c.remove(); })()">Got it</button>';
+
+            const ui = buildGuideCard(tip.title, tip.bullets, controls);
+            ui.overlay.style.display = 'block';
+            ui.overlay.addEventListener('click', function(){
+                ui.overlay.style.display = 'none';
+                if (ui.card && ui.card.parentNode) ui.card.parentNode.removeChild(ui.card);
+            }, { once: true });
+        } catch (e) {}
+    }
+
     window.onload = function() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
@@ -360,6 +507,16 @@
         }
 
         disableDeleteForNonAdmin();
+
+        try {
+            if (window.CURRENT_USERNAME) {
+                const userKey = (window.CURRENT_USERNAME || '').trim();
+                const onboarded = localStorage.getItem('onboarded_' + userKey);
+                if (!onboarded) {
+                    startGuidance(false);
+                }
+            }
+        } catch (e) {}
 
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('.user-dropdown');
