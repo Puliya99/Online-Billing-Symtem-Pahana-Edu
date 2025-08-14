@@ -210,6 +210,9 @@
       <button type="button" class="btn btn-success" onclick="document.getElementById('itemCsvInput').click()" title="Import Items from CSV">
         <i class="fas fa-file-import"></i> Import
       </button>
+      <button type="button" class="btn btn-warning" onclick="exportItemsCsv()" title="Export Items to CSV">
+        <i class="fas fa-file-export"></i> Export
+      </button>
     </div>
 
     <!-- Scrollable Table -->
@@ -448,6 +451,15 @@
       });
     }
   })();
+
+  function exportItemsCsv() {
+    try {
+      // Trigger file download; include context path explicitly used elsewhere
+      window.location.href = 'http://localhost:8081/PahanaEduBillingSystem/ItemExport';
+    } catch (e) {
+      alert('Failed to start export: ' + (e && e.message ? e.message : e));
+    }
+  }
 
   function uploadItemCsv(file) {
     const btns = document.querySelectorAll('button');
