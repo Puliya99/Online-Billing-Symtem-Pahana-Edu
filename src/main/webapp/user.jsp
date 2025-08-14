@@ -326,6 +326,11 @@
     }
 
     function deleteUser() {
+        // Block delete for non-admins at function level
+        if ((window.CURRENT_USER_ROLE || '').toLowerCase() !== 'admin') {
+            alert('You do not have permission to delete. Please contact an administrator.');
+            return;
+        }
         if (rowIndex === null) {
             alert('Please select a user to delete!');
             return;

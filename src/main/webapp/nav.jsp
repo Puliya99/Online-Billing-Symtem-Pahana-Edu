@@ -12,6 +12,11 @@
         return;
     }
     String username = (String) session.getAttribute("username");
+    String role = null;
+    Object roleAttr = session.getAttribute("role");
+    if (roleAttr != null) {
+        role = roleAttr.toString();
+    }
 %>
 <style>
     .navbar {
@@ -235,6 +240,9 @@
 </nav>
 
 <script>
+    window.CURRENT_USERNAME = '<%= username %>';
+    window.CURRENT_USER_ROLE = '<%= role != null ? role : "" %>';
+
     function toggleDropdown(event) {
         if (event.target.closest('.dropdown-item')) {
             return;
@@ -260,19 +268,41 @@
             localStorage.setItem('theme', 'dark');
         }
 
-        // Hide dropdown after action
         const dropdown = document.querySelector('.user-dropdown');
         if (dropdown) dropdown.style.display = 'none';
     }
 
-    // Load saved theme on page load
+    function disableDeleteForNonAdmin() {
+        try {
+            const role = (window.CURRENT_USER_ROLE || '').toLowerCase();
+            if (role === 'admin') return;
+            const deleteControls = document.querySelectorAll('.btn-danger, [data-action="delete"], .delete-button');
+            deleteControls.forEach(el => {
+                el.style.opacity = '0.6';
+                el.style.cursor = 'not-allowed';
+                el.setAttribute('title', 'Delete is allowed only for Admins');
+                // Disable form controls if possible
+                if (typeof el.disabled !== 'undefined') {
+                    el.disabled = true;
+                }
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    alert('You do not have permission to delete. Please contact an administrator.');
+                    return false;
+                }, { capture: true });
+            });
+        } catch (e) { /* noop */ }
+    }
+
     window.onload = function() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-mode');
         }
 
-        // Close dropdown when clicking outside
+        disableDeleteForNonAdmin();
+
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('.user-dropdown');
             const userLogo = document.querySelector('.user-logo');

@@ -29,6 +29,13 @@ public class AuthController extends HttpServlet {
             boolean isValid = userBO.validateUser(user.getUsername(), user.getPassword());
             if (isValid) {
                 req.getSession(true).setAttribute("username", user.getUsername());
+                try {
+                    UserDTO fullUser = userBO.searchUser(user.getUsername());
+                    if (fullUser != null && fullUser.getRole() != null) {
+                        req.getSession(true).setAttribute("role", fullUser.getRole());
+                    }
+                } catch (Exception ignored) {
+                }
             }
             resp.getWriter().write(isValid ? "valid" : "invalid");
             logger.info(isValid ? "User Authenticated" : "User Authentication Failed");
