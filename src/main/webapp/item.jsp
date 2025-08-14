@@ -200,11 +200,18 @@
   <div class="data-card">
     <h4><i class="fas fa-list"></i> Item List</h4>
 
-    <!-- Search Bar -->
-    <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem;">
-      <input type="text" id="searchInput" class="form-control" placeholder="Search by Description or Item ID" style="flex: 1;">
-      <button type="button" class="btn btn-primary" onclick="searchItem()">
+    <!-- Search & Import Bar -->
+    <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+      <input type="text" id="searchInput" class="form-control" placeholder="Search by Description or Item ID" style="flex: 1; min-width: 200px;">
+      <button type="button" class="btn btn-primary" onclick="searchItem()" title="Search">
         <i class="fas fa-search"></i> Search
+      </button>
+      <input type="file" id="itemCsvInput" accept=".csv" style="display:none" />
+      <button type="button" class="btn btn-success" onclick="document.getElementById('itemCsvInput').click()" title="Import Items from CSV">
+        <i class="fas fa-file-import"></i> Import
+      </button>
+      <button type="button" class="btn btn-warning" onclick="exportItemsCsv()" title="Export Items to CSV">
+        <i class="fas fa-file-export"></i> Export
       </button>
     </div>
 
@@ -423,3 +430,54 @@
 </script>
 </body>
 </html>
+
+<script>
+  (function(){
+    const input = document.getElementById('itemCsvInput');
+    if (input) {
+      input.addEventListener('change', function(){
+        if (!this.files || this.files.length === 0) return;
+        const file = this.files[0];
+        if (!file.name.toLowerCase().endsWith('.csv')) {
+          alert('Please select a .csv file');
+          this.value = '';
+          return;
+        }
+        if (!confirm('Import items from file: ' + file.name + '?')) {
+          this.value = '';
+          return;
+        }
+        uploadItemCsv(file);
+      });
+    }
+  })();
+
+  function exportItemsCsv() {
+    try {
+      // Trigger file download; include context path explicitly used elsewhere
+      window.location.href = 'http://localhost:8081/PahanaEduBillingSystem/ItemExport';
+    } catch (e) {
+      alert('Failed to start export: ' + (e && e.message ? e.message : e));
+    }
+  }
+
+  function uploadItemCsv(file) {
+    const btns = document.querySelectorAll('button');
+    btns.forEach(b => b.disabled = true);
+    const fd = new FormData();
+    fd.append('file', file);
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'http://localhost:8081/PahanaEduBillingSystem/ItemImport', true);
+    xhr.onreadystatechange = function(){
+      if (xhr.readyState === 4) {
+        btns.forEach(b => b.disabled = false);
+        const msg = xhr.responseText || ('Status: ' + xhr.status);
+        alert('Import result:\n\n' + msg);
+        if (xhr.status === 200) {
+          window.location.reload();
+        }
+      }
+    };
+    xhr.send(fd);
+  }
+</script>
