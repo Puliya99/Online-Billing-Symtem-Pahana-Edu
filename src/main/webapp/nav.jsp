@@ -215,13 +215,59 @@
         border-color: #3a3a3a;
         color: #dcdcdc;
     }
+
+    /* Responsive menu */
+    .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: #4e73df;
+        font-size: 1.4rem;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.35rem;
+    }
+    .menu-toggle:focus { outline: 2px solid rgba(78,115,223,0.4); }
+
+    @media (max-width: 768px) {
+        .menu-toggle { display: block; }
+        .nav-list {
+            display: none;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            flex-direction: column;
+            background: #ffffff;
+            padding: 0.5rem 0;
+            gap: 0;
+            border-bottom: 1px solid #e3e6f0;
+            box-shadow: 0 0.5rem 1.5rem rgba(58, 59, 69, 0.15);
+        }
+        .nav-list.show { display: flex; }
+        .nav-list li { border-top: 1px solid #e3e6f0; }
+        .nav-list li:first-child { border-top: none; }
+        .nav-link { border-radius: 0; padding: 0.75rem 1rem; }
+        .user-logo { margin: 0.5rem 1rem 0.25rem auto; }
+    }
+
+    .dark-mode @media (max-width: 768px) { /* not valid syntax, so override below */ }
+    @media (max-width: 768px) {
+        .dark-mode .nav-list {
+            background: #2d2d2d;
+            border-bottom-color: #3a3a3a;
+            box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+        }
+        .dark-mode .nav-list li { border-top-color: #3a3a3a; }
+    }
 </style>
 <nav class="navbar">
     <div style="display: flex; align-items: center;">
         <img src="frontend/assets/logo.png" alt="Logo" class="nav-logo">
         <span class="brand-name">Pahana Edu</span>
     </div>
-    <ul class="nav-list">
+    <button class="menu-toggle" aria-label="Toggle menu" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+    <ul id="mainNav" class="nav-list">
         <li><a id="dashboard" class="nav-link" href="dashboard.jsp"><i class="fas fa-tachometer-alt"></i>Dashboard</a></li>
         <li><a id="customer" class="nav-link" href="customer.jsp"><i class="fas fa-users"></i>Customer</a></li>
         <li><a id="vendor" class="nav-link" href="vendor.jsp"><i class="fas fa-truck"></i>Vendor</a></li>
@@ -297,6 +343,16 @@
         } catch (e) { /* noop */ }
     }
 
+    function toggleMenu() {
+        const nav = document.getElementById('mainNav');
+        if (nav) nav.classList.toggle('show');
+    }
+
+    function closeMenu() {
+        const nav = document.getElementById('mainNav');
+        if (nav) nav.classList.remove('show');
+    }
+
     window.onload = function() {
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
@@ -308,8 +364,26 @@
         document.addEventListener('click', function(event) {
             const dropdown = document.querySelector('.user-dropdown');
             const userLogo = document.querySelector('.user-logo');
-            if (dropdown && !userLogo.contains(event.target)) {
+            if (dropdown && userLogo && !userLogo.contains(event.target)) {
                 dropdown.style.display = 'none';
+            }
+            // Close mobile menu when clicking outside the navbar
+            const navbar = document.querySelector('.navbar');
+            const nav = document.getElementById('mainNav');
+            if (nav && navbar && !navbar.contains(event.target)) {
+                closeMenu();
+            }
+        });
+
+        document.querySelectorAll('#mainNav .nav-link, #mainNav .dropdown-item').forEach(function(a){
+            a.addEventListener('click', function(){
+                closeMenu();
+            });
+        });
+
+        window.addEventListener('resize', function(){
+            if (window.innerWidth > 768) {
+                closeMenu();
             }
         });
     };
