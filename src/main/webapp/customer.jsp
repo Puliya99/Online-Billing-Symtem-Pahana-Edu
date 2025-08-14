@@ -221,6 +221,9 @@
       <button type="button" class="btn btn-success" onclick="document.getElementById('customerCsvInput').click()" title="Import Customers from CSV">
         <i class="fas fa-file-import"></i> Import
       </button>
+      <button type="button" class="btn btn-warning" onclick="exportCustomersCsv()" title="Export Customers to CSV">
+        <i class="fas fa-file-export"></i> Export
+      </button>
     </div>
 
     <!-- Scrollable Table -->
@@ -492,5 +495,13 @@
       }
     };
     xhr.send(fd);
+  }
+
+  function exportCustomersCsv() {
+    try {
+      window.location.href = 'http://localhost:8081/PahanaEduBillingSystem/CustomerExport';
+    } catch (e) {
+      alert('Failed to start export: ' + (e && e.message ? e.message : e));
+    }
   }
 </script>
