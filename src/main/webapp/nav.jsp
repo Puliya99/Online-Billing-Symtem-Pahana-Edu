@@ -524,7 +524,6 @@
             if (dropdown && userLogo && !userLogo.contains(event.target)) {
                 dropdown.style.display = 'none';
             }
-            // Close mobile menu when clicking outside the navbar
             const navbar = document.querySelector('.navbar');
             const nav = document.getElementById('mainNav');
             if (nav && navbar && !navbar.contains(event.target)) {

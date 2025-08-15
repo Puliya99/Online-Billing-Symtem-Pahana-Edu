@@ -14,12 +14,15 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @WebServlet(name = "UserModel", urlPatterns = "/UserModel", loadOnStartup = 4)
 public class UserController extends HttpServlet {
     private final static Logger logger = LoggerFactory.getLogger(UserController.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final UserBO userBO = (UserBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.USER);
+
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9+_.-]+@(.+)$");
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -44,6 +47,32 @@ public class UserController extends HttpServlet {
             boolean saved = userBO.saveUser(user);
             resp.getWriter().write(saved ? "saved" : "not saved");
             logger.info(saved ? "User Saved" : "User Save Failed");
+
+            if (saved && user != null) {
+                String email = user.getEmail();
+                if (email != null && !email.trim().isEmpty() && EMAIL_PATTERN.matcher(email).matches()) {
+                    String loginUrl = req.getRequestURL().toString().replace("/UserModel", "/login.jsp");
+                    String subject = "Your Pahana Edu account";
+                    String body = "Hello " + (user.getUsername() != null ? user.getUsername() : "User") + ",\n\n" +
+                            "Your account has been created. Here are your credentials:\n" +
+                            "Username: " + (user.getUsername() != null ? user.getUsername() : "") + "\n" +
+                            "Password: " + (user.getPassword() != null ? user.getPassword() : "") + "\n\n" +
+                            "Login here: " + loginUrl + "\n\n" +
+                            "– Pahana Edu";
+                    boolean mailed = com.example.pahanaedubillingsystem.backend.util.MailUtil.send(email.trim(), subject, body);
+                    if (!mailed) {
+                        if (!com.example.pahanaedubillingsystem.backend.util.MailUtil.isConfigured()) {
+                            logger.info("User created; email not sent to {} because email delivery is disabled (MAIL_HOST not set)", email);
+                        } else {
+                            logger.warn("User created but email not sent to {}", email);
+                        }
+                    } else {
+                        logger.info("Credentials email sent to {}", email);
+                    }
+                } else {
+                    logger.warn("User created but email not sent to {} because email is invalid or empty", email);
+                }
+            }
         } catch (Exception e) {
             logger.error("User Save Error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
