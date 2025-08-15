@@ -11,19 +11,19 @@ import java.util.List;
 
 public class UserDAOImpl implements UserDAO {
     private static final String GET_USERS = "SELECT * FROM users";
-    private static final String SAVE_USER = "INSERT INTO users (username, password, role) VALUES (?, ?, ?)";
-    private static final String UPDATE_USER = "UPDATE users SET username = ?, password = ?, role = ? WHERE username = ?";
+    private static final String SAVE_USER = "INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)";
+    private static final String UPDATE_USER = "UPDATE users SET username = ?, password = ?, email = ?, role = ? WHERE username = ?";
     private static final String DELETE_USER = "DELETE FROM users WHERE username = ?";
     private static final String VALIDATE_USER = "SELECT * FROM users WHERE username = ? AND password = ?";
 
     @Override
     public boolean save(User entity) throws SQLException {
-        return SQLUtil.execute(SAVE_USER, entity.getUsername(), entity.getPassword(), entity.getRole() != null ? entity.getRole().name() : null);
+        return SQLUtil.execute(SAVE_USER, entity.getUsername(), entity.getPassword(), entity.getEmail(), entity.getRole() != null ? entity.getRole().name() : null);
     }
 
     @Override
     public boolean update(User entity) throws SQLException {
-        return SQLUtil.execute(UPDATE_USER, entity.getUsername(), entity.getPassword(), entity.getRole() != null ? entity.getRole().name() : null, entity.getUsername());
+        return SQLUtil.execute(UPDATE_USER, entity.getUsername(), entity.getPassword(), entity.getEmail(), entity.getRole() != null ? entity.getRole().name() : null, entity.getUsername());
     }
 
     @Override
@@ -37,7 +37,7 @@ public class UserDAOImpl implements UserDAO {
         if (rst.next()) {
             String roleStr = rst.getString("role");
             Role role = roleStr != null ? Role.valueOf(roleStr) : null;
-            return new User(rst.getString("username"), rst.getString("password"), role);
+            return new User(rst.getString("username"), rst.getString("password"), rst.getString("email"), role);
         }
         return null;
     }
@@ -49,7 +49,7 @@ public class UserDAOImpl implements UserDAO {
         while (rst.next()) {
             String roleStr = rst.getString("role");
             Role role = roleStr != null ? Role.valueOf(roleStr) : null;
-            users.add(new User(rst.getString("username"), rst.getString("password"), role));
+            users.add(new User(rst.getString("username"), rst.getString("password"), rst.getString("email"), role));
         }
         return users;
     }
@@ -70,7 +70,7 @@ public class UserDAOImpl implements UserDAO {
         if (rst.next()) {
             String roleStr = rst.getString("role");
             Role role = roleStr != null ? Role.valueOf(roleStr) : null;
-            return new User(rst.getString("username"), rst.getString("password"), role);
+            return new User(rst.getString("username"), rst.getString("password"), rst.getString("email"), role);
         }
         return null;
     }

@@ -193,6 +193,13 @@
                 </div>
             </div>
             <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                    <input type="text" class="form-control" id="email" placeholder="Enter Email">
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="userRole">Role</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
@@ -227,6 +234,7 @@
                 <tr>
                     <th>Username</th>
                     <th>Password</th>
+                    <th>Email</th>
                     <th>Role</th>
                 </tr>
                 </thead>
@@ -236,9 +244,10 @@
                     List<UserDTO> users = userBO.getAllUsers();
                     for (UserDTO user : users) {
                 %>
-                <tr onclick="selectUser('<%= user.getUsername() %>', '<%= user.getPassword() %>', '<%= user.getRole() %>')">
+                <tr onclick="selectUser('<%= user.getUsername() %>', '<%= user.getPassword() %>', '<%= user.getEmail() %>', '<%= user.getRole() %>')">
                     <td><%= user.getUsername() %></td>
                     <td><%= user.getPassword() %></td>
+                    <td><%= user.getEmail() %></td>
                     <td><%= user.getRole() %></td>
                 </tr>
                 <% } %>
@@ -251,13 +260,17 @@
 <script>
     let rowIndex = null;
 
-    function checkValidation(username, password, role) {
+    function checkValidation(username, password, email, role) {
         if (!/^[a-zA-Z0-9_]{4,20}$/.test(username)) {
             alert('Please enter a valid username (4-20 characters, letters, numbers, and underscores only)!');
             return false;
         }
         if (!/^[a-zA-Z0-9!@#$%^&*]{6,20}$/.test(password)) {
             alert('Please enter a valid password (6-20 characters, letters, numbers, and special characters)!');
+            return false;
+        }
+        if (!/^[a-zA-Z0-9.!@#$%^&*]{6,50}$/.test(email)) {
+            alert('Please enter a valid email (6-50 characters, letters, numbers, and special characters)!');
             return false;
         }
         if (!/^[a-zA-Z\s]{2,20}$/.test(role)) {
@@ -270,11 +283,12 @@
     function saveUser() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
+        const email = document.getElementById('email').value;
         const role = document.getElementById('userRole').value;
 
-        if (!checkValidation(username, password, role)) return;
+        if (!checkValidation(username, password, email, role)) return;
 
-        const user = { username, password, role };
+        const user = { username, password, email, role };
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'http://localhost:8081/PahanaEduBillingSystem/UserModel', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -291,11 +305,12 @@
         xhr.send(JSON.stringify(user));
     }
 
-    function selectUser(username, password, role) {
-        console.log('Selecting user:', username, password, role);
+    function selectUser(username, password, email, role) {
+        console.log('Selecting user:', username, password, email, role);
 
         document.getElementById('username').value = username;
         document.getElementById('password').value = password;
+        document.getElementById('email').value = email;
         document.getElementById('userRole').value = role;
 
         document.getElementById('deleteWarning').style.display = 'none';
@@ -319,11 +334,12 @@
         }
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
+        const email = document.getElementById('email').value;
         const role = document.getElementById('userRole').value;
 
-        if (!checkValidation(username, password, role)) return;
+        if (!checkValidation(username, password, email, role)) return;
 
-        const user = { username, password, role };
+        const user = { username, password, email, role };
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', 'http://localhost:8081/PahanaEduBillingSystem/UserModel', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -341,7 +357,6 @@
     }
 
     function deleteUser() {
-        // Block delete for non-admins at function level
         if ((window.CURRENT_USER_ROLE || '').toLowerCase() !== 'admin') {
             alert('You do not have permission to delete. Please contact an administrator.');
             return;

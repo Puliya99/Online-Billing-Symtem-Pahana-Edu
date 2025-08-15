@@ -14,12 +14,12 @@ public class UserBOImpl implements UserBO {
 
     @Override
     public boolean saveUser(UserDTO dto) throws SQLException {
-        return userDAO.save(new User(dto.getUsername(), dto.getPassword(), dto.getRole()));
+        return userDAO.save(new User(dto.getUsername(), dto.getPassword(), dto.getEmail(), dto.getRole()));
     }
 
     @Override
     public boolean updateUser(UserDTO dto) throws SQLException {
-        return userDAO.update(new User(dto.getUsername(), dto.getPassword(), dto.getRole()));
+        return userDAO.update(new User(dto.getUsername(), dto.getPassword(), dto.getEmail(), dto.getRole()));
     }
 
     @Override
@@ -31,7 +31,7 @@ public class UserBOImpl implements UserBO {
     public UserDTO searchUser(String username) throws SQLException {
         User user = userDAO.search(username);
         if (user != null) {
-            return new UserDTO(user.getUsername(), user.getPassword(), user.getRole());
+            return new UserDTO(user.getUsername(), user.getPassword(), user.getEmail(), user.getRole());
         }
         return null;
     }
@@ -41,7 +41,7 @@ public class UserBOImpl implements UserBO {
         List<UserDTO> users = new ArrayList<>();
         List<User> all = userDAO.getAll();
         for (User u : all) {
-            users.add(new UserDTO(u.getUsername(), u.getPassword(), u.getRole()));
+            users.add(new UserDTO(u.getUsername(), u.getPassword(), u.getEmail(), u.getRole()));
         }
         return users;
     }
@@ -55,7 +55,7 @@ public class UserBOImpl implements UserBO {
     public UserDTO searchByIdUser(String username) throws SQLException {
         User user = userDAO.searchById(username);
         if (user != null) {
-            return new UserDTO(user.getUsername(), user.getPassword(), user.getRole());
+            return new UserDTO(user.getUsername(), user.getPassword(), user.getEmail(), user.getRole());
         }
         return null;
     }
