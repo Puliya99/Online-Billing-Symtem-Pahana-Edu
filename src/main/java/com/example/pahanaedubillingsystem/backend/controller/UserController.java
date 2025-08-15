@@ -89,6 +89,43 @@ public class UserController extends HttpServlet {
             boolean updated = userBO.updateUser(user);
             resp.getWriter().write(updated ? "updated" : "not updated");
             logger.info(updated ? "User Updated" : "User Update Failed");
+
+            if (updated && user != null) {
+                String email = user.getEmail();
+                if (email == null || email.trim().isEmpty()) {
+                    try {
+                        UserDTO existing = userBO.searchUser(user.getUsername());
+                        if (existing != null) {
+                            email = existing.getEmail();
+                        }
+                    } catch (Exception ex) {
+                        logger.warn("Unable to fetch existing user for email lookup after update: {}", ex.getMessage());
+                    }
+                }
+
+                if (email != null && !email.trim().isEmpty() && EMAIL_PATTERN.matcher(email).matches()) {
+                    String loginUrl = req.getRequestURL().toString().replace("/UserModel", "/login.jsp");
+                    String subject = "Your Pahana Edu credentials were updated";
+                    String body = "Hello " + (user.getUsername() != null ? user.getUsername() : "User") + ",\n\n" +
+                            "Your account credentials were updated. Here are your current credentials:\n" +
+                            "Username: " + (user.getUsername() != null ? user.getUsername() : "") + "\n" +
+                            "Password: " + (user.getPassword() != null ? user.getPassword() : "") + "\n\n" +
+                            "Login here: " + loginUrl + "\n\n" +
+                            "– Pahana Edu";
+                    boolean mailed = com.example.pahanaedubillingsystem.backend.util.MailUtil.send(email.trim(), subject, body);
+                    if (!mailed) {
+                        if (!com.example.pahanaedubillingsystem.backend.util.MailUtil.isConfigured()) {
+                            logger.info("User updated; email not sent to {} because email delivery is disabled (MAIL_HOST not set)", email);
+                        } else {
+                            logger.warn("User updated but email not sent to {}", email);
+                        }
+                    } else {
+                        logger.info("Updated credentials email sent to {}", email);
+                    }
+                } else {
+                    logger.warn("User updated but email not sent because email is invalid or empty (username: {})", user.getUsername());
+                }
+            }
         } catch (Exception e) {
             logger.error("User Update Error", e);
             resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
