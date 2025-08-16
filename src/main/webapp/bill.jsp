@@ -388,6 +388,7 @@
                             <td><%= bill.getDiscount() %></td>
                             <td><%= bill.getTotalAmount() %></td>
                             <td>
+                                <button title="View" style="background:none;border:none;color:#36b9cc;cursor:pointer" onclick="viewBill('<%= bill.getBillId() %>','<%= bill.getCartId() %>')"><i class="fas fa-eye"></i></button>
                                 <button title="Print" style="background:none;border:none;color:#4e73df;cursor:pointer" onclick="printBill('<%= bill.getBillId() %>')"><i class="fas fa-print"></i></button>
                                 <button title="Edit" style="background:none;border:none;color:#1cc88a;cursor:pointer" onclick="editBill('<%= bill.getBillId() %>','<%= bill.getAccountNo() %>','<%= bill.getCartId() %>',<%= bill.getDiscount() %>)"><i class="fas fa-edit"></i></button>
                                 <button title="Delete" style="background:none;border:none;color:#e74a3b;cursor:pointer" onclick="deleteBill('<%= bill.getBillId() %>')"><i class="fas fa-trash"></i></button>
@@ -398,6 +399,40 @@
                     </table>
                 </div>
             </div>
+</div>
+</div>
+</div>
+
+<!-- View Bill Items Modal -->
+<div id="billItemsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div style="background:#fff; width:90%; max-width:800px; border-radius:8px; overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; background:#f8f9fc; border-bottom:1px solid #e3e6f0;">
+            <h5 id="billItemsModalTitle" style="margin:0; color:#5a5c69; font-weight:600;">
+                <i class="fas fa-eye"></i> Bill Items
+            </h5>
+            <button id="billItemsModalClose" aria-label="Close" style="background:none;border:none;font-size:20px;cursor:pointer;color:#6c757d">&times;</button>
+        </div>
+        <div style="padding:16px;">
+            <div id="billItemsInfo" style="margin-bottom:8px; color:#6c757d; font-size:0.9rem;"></div>
+            <div class="table-scroll" style="max-height: 360px;">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Item ID</th>
+                            <th>Description</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Line Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billItemsTbody">
+                        <tr><td colspan="5" style="text-align:center;color:#858796">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div style="padding:12px 16px; text-align:right; border-top:1px solid #e3e6f0; background:#f8f9fc;">
+            <button class="btn" id="billItemsModalOk" style="background-color:#4e73df">OK</button>
         </div>
     </div>
 </div>
@@ -960,6 +995,105 @@
         };
         xhr.send();
     }
+
+    function openBillItemsModal() {
+        const modal = document.getElementById('billItemsModal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+    }
+    function closeBillItemsModal() {
+        const modal = document.getElementById('billItemsModal');
+        if (!modal) return;
+        modal.style.display = 'none';
+    }
+
+    function renderBillItemsModal(items, billId, cartId, itemMap) {
+        const tbody = document.getElementById('billItemsTbody');
+        const info = document.getElementById('billItemsInfo');
+        const title = document.getElementById('billItemsModalTitle');
+        if (title) title.innerHTML = '<i class="fas fa-eye"></i> Bill Items - ' + billId;
+        if (info) info.textContent = 'Cart ID: ' + (cartId || '-') + '  •  Items: ' + (Array.isArray(items) ? items.length : 0);
+
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        if (!Array.isArray(items) || items.length === 0) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td colspan="5" style="text-align:center;color:#858796">No items found for this bill</td>';
+            tbody.appendChild(tr);
+            return;
+        }
+        items.forEach(ci => {
+            const id = ci.itemId || '';
+            const qty = Number(ci.qty) || 0;
+            const price = Number(ci.unitPrice) || (itemMap && itemMap[id] ? Number(itemMap[id].price) : 0);
+            const name = (itemMap && itemMap[id] ? itemMap[id].name : '') || '';
+            const line = Number(ci.lineTotal) || (qty * price);
+            const tr = document.createElement('tr');
+            tr.innerHTML = '\n                <td>' + id + '</td>\n                <td>' + name + '</td>\n                <td>' + qty + '</td>\n                <td>Rs. ' + price.toFixed(2) + '</td>\n                <td>Rs. ' + line.toFixed(2) + '</td>\n            ';
+            tbody.appendChild(tr);
+        });
+    }
+
+    function viewBill(billId, cartId) {
+        if (!cartId) {
+            alert('This bill does not have a cart.');
+            return;
+        }
+        const tbody = document.getElementById('billItemsTbody');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#858796">Loading...</td></tr>';
+        const info = document.getElementById('billItemsInfo');
+        if (info) info.textContent = '';
+        openBillItemsModal();
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', BASE + '/CartItemModel?cart_id=' + encodeURIComponent(cartId), true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    let cartItems = [];
+                    try {
+                        cartItems = JSON.parse(xhr.responseText || '[]');
+                    } catch (e) {
+                        updateDebugInfo('Failed to parse cart items for view: ' + e.message);
+                        renderBillItemsModal([], billId, cartId, {});
+                        return;
+                    }
+                    const xhrItems = new XMLHttpRequest();
+                    xhrItems.open('GET', BASE + '/ItemModel', true);
+                    xhrItems.onreadystatechange = function () {
+                        if (xhrItems.readyState === 4) {
+                            let itemMap = {};
+                            if (xhrItems.status === 200) {
+                                try {
+                                    const allItems = JSON.parse(xhrItems.responseText || '[]');
+                                    allItems.forEach(it => { itemMap[it.itemId] = { name: it.name || 'Unknown Item', price: Number(it.price) || 0 }; });
+                                } catch (e) {
+                                    updateDebugInfo('Failed to parse items for view: ' + e.message);
+                                }
+                            }
+                            renderBillItemsModal(cartItems, billId, cartId, itemMap);
+                        }
+                    };
+                    xhrItems.send();
+                } else {
+                    updateDebugInfo('Failed to fetch cart items for view. Status: ' + xhr.status);
+                    renderBillItemsModal([], billId, cartId, {});
+                }
+            }
+        };
+        xhr.send();
+    }
+
+    (function() {
+        const closeBtn = document.getElementById('billItemsModalClose');
+        const okBtn = document.getElementById('billItemsModalOk');
+        const modal = document.getElementById('billItemsModal');
+        if (closeBtn) closeBtn.addEventListener('click', closeBillItemsModal);
+        if (okBtn) okBtn.addEventListener('click', closeBillItemsModal);
+        if (modal) modal.addEventListener('click', function(evt){
+            if (evt.target === modal) closeBillItemsModal();
+        });
+    })();
 
     function applyTableFilters() {
         const textFilter = document.getElementById('searchInput').value.toLowerCase().trim();
