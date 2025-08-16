@@ -171,6 +171,13 @@
                 </div>
             </div>
             <div class="form-group">
+                <label for="grnDate">GRN Date</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                    <input type="date" class="form-control" id="grnDate">
+                </div>
+            </div>
+            <div class="form-group">
                 <label for="name">Vendor Name</label>
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-user"></i></span>
@@ -233,6 +240,10 @@
         <!-- Search & Export Bar -->
         <div style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
             <input type="text" id="searchInput" class="form-control" placeholder="Search by GRN ID or Vendor Name" style="flex: 1; min-width: 200px;">
+            <div class="input-group" style="flex: 0 1 auto; min-width: 220px;">
+                <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                <input type="date" id="vendorDateFilter" class="form-control" placeholder="Filter by GRN Date">
+            </div>
             <button type="button" class="btn btn-primary" onclick="searchVendor()" title="Search">
                 <i class="fas fa-search"></i> Search
             </button>
@@ -247,6 +258,7 @@
                 <thead>
                 <tr>
                     <th>GRN ID</th>
+                    <th>GRN Date</th>
                     <th>Vendor Name</th>
                     <th>Item ID</th>
                     <th>Description</th>
@@ -265,8 +277,9 @@
                     }
                     for (VendorDTO vendor : vendors) {
                 %>
-                <tr onclick="selectVendor('<%= vendor.getGrnId() %>', '<%= vendor.getName() %>', '<%= vendor.getItemId() %>', '<%= vendor.getDescription() %>', <%= vendor.getQty() %>, <%= vendor.getBuyingPrice() %>)">
+                <tr onclick="selectVendor('<%= vendor.getGrnId() %>', '<%= vendor.getGrnDate() != null ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(vendor.getGrnDate()) : "" %>', '<%= vendor.getName() %>', '<%= vendor.getItemId() %>', '<%= vendor.getDescription() %>', <%= vendor.getQty() %>, <%= vendor.getBuyingPrice() %>)">
                     <td><%= vendor.getGrnId() %></td>
+                    <td><%= vendor.getGrnDate() != null ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(vendor.getGrnDate()) : "" %></td>
                     <td><%= vendor.getName() %></td>
                     <td><%= vendor.getItemId() %></td>
                     <td><%= vendor.getDescription() %></td>
@@ -284,6 +297,14 @@
     const BASE = '<%= request.getContextPath() %>';
     let rowIndex = null;
 
+    function todayStr() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
     function loadId() {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', 'http://localhost:8081/PahanaEduBillingSystem/VendorModel', true);
@@ -297,6 +318,10 @@
                     const lastNumber = parseInt(lastId.slice(1));
                     document.getElementById('grnId').value = 'G' + (lastNumber + 1).toString().padStart(3, '0');
                 }
+                const dateInput = document.getElementById('grnDate');
+                if (dateInput && !dateInput.value) {
+                    dateInput.value = todayStr();
+                }
             }
         };
         xhr.send();
@@ -304,9 +329,13 @@
 
     loadId();
 
-    function checkValidation(grnId, name, itemId, description, qty, buyingPrice) {
+    function checkValidation(grnId, grnDate, name, itemId, description, qty, buyingPrice) {
         if (!/^[A-Za-z0-9]{3,10}$/.test(grnId)) {
             alert('Please enter a valid GRN ID (e.g., G001)!');
+            return false;
+        }
+        if (!grnDate || !/^\d{4}-\d{2}-\d{2}$/.test(grnDate)) {
+            alert('Please select a valid GRN Date!');
             return false;
         }
         if (!/^[A-Za-z\s]{4,60}$/.test(name)) {
@@ -351,15 +380,16 @@
 
     function saveVendor() {
         const grnId = document.getElementById('grnId').value;
+        const grnDate = document.getElementById('grnDate').value;
         const name = document.getElementById('name').value;
         const itemId = document.getElementById('itemId').value;
         const description = document.getElementById('description').value;
         const qty = parseInt(document.getElementById('qty').value);
         const buyingPrice = parseFloat(document.getElementById('buyingPrice').value);
 
-        if (!checkValidation(grnId, name, itemId, description, qty, buyingPrice)) return;
+        if (!checkValidation(grnId, grnDate, name, itemId, description, qty, buyingPrice)) return;
 
-        const vendor = { grnId, name, itemId, description, qty, buyingPrice };
+        const vendor = { grnId, grnDate, name, itemId, description, qty, buyingPrice };
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'http://localhost:8081/PahanaEduBillingSystem/VendorModel', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -376,8 +406,9 @@
         xhr.send(JSON.stringify(vendor));
     }
 
-    function selectVendor(grnId, name, itemId, description, qty, buyingPrice) {
+    function selectVendor(grnId, grnDate, name, itemId, description, qty, buyingPrice) {
         document.getElementById('grnId').value = grnId;
+        document.getElementById('grnDate').value = grnDate || '';
         document.getElementById('name').value = name;
         document.getElementById('itemId').value = itemId;
         document.getElementById('description').value = description;
@@ -399,15 +430,16 @@
             return;
         }
         const grnId = document.getElementById('grnId').value;
+        const grnDate = document.getElementById('grnDate').value;
         const name = document.getElementById('name').value;
         const itemId = document.getElementById('itemId').value;
         const description = document.getElementById('description').value;
         const qty = parseInt(document.getElementById('qty').value);
         const buyingPrice = parseFloat(document.getElementById('buyingPrice').value);
 
-        if (!checkValidation(grnId, name, itemId, description, qty, buyingPrice)) return;
+        if (!checkValidation(grnId, grnDate, name, itemId, description, qty, buyingPrice)) return;
 
-        const vendor = { grnId, name, itemId, description, qty, buyingPrice };
+        const vendor = { grnId, grnDate, name, itemId, description, qty, buyingPrice };
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', 'http://localhost:8081/PahanaEduBillingSystem/VendorModel', true);
         xhr.setRequestHeader('Content-Type', 'application/json');
@@ -469,6 +501,8 @@
         document.getElementById('vendor-form').reset();
         document.getElementById('deleteWarning').style.display = 'none';
         rowIndex = null;
+        const dateInput = document.getElementById('grnDate');
+        if (dateInput) dateInput.value = todayStr();
         setTimeout(loadId, 10);
     }
 
@@ -480,26 +514,38 @@
         }
     }
 
-    function searchVendor() {
-        const filter = document.getElementById('searchInput').value.toLowerCase();
+    function applyVendorFilters() {
+        const textFilter = document.getElementById('searchInput').value.toLowerCase().trim();
+        const dateFilter = (document.getElementById('vendorDateFilter').value || '').trim();
         const table = document.getElementById('vendorTable');
         const rows = table.getElementsByTagName('tr');
 
         for (let i = 0; i < rows.length; i++) {
             const grnId = rows[i].cells[0].innerText.toLowerCase();
-            const name = rows[i].cells[1].innerText.toLowerCase();
-            if (grnId.includes(filter) || name.includes(filter)) {
-                rows[i].style.display = '';
-            } else {
-                rows[i].style.display = 'none';
-            }
+            const grnDate = rows[i].cells[1].innerText.trim();
+            const name = rows[i].cells[2].innerText.toLowerCase();
+
+            const matchesText = !textFilter || grnId.includes(textFilter) || name.includes(textFilter);
+            const matchesDate = !dateFilter || grnDate === dateFilter;
+
+            rows[i].style.display = (matchesText && matchesDate) ? '' : 'none';
         }
+    }
+
+    function searchVendor() {
+        applyVendorFilters();
     }
 
     document.getElementById('searchInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
             searchVendor();
         }
+    });
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        applyVendorFilters();
+    });
+    document.getElementById('vendorDateFilter').addEventListener('change', function() {
+        applyVendorFilters();
     });
 </script>
 </body>
