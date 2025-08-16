@@ -170,6 +170,76 @@
     </div>
 
     <div class="section-header">
+        <h2><i class="fas fa-coins"></i> Sales</h2>
+        <p>Sum of Bill Total Amounts over selected periods</p>
+    </div>
+    <div class="stats-row">
+        <%
+            java.util.function.Function<Date, LocalDate> toLocalSales = (Date d) -> {
+                if (d == null) return null;
+                return Instant.ofEpochMilli(d.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            };
+
+            LocalDate todayS = LocalDate.now(ZoneId.systemDefault());
+            LocalDate startOfWeekS = todayS.with(java.time.DayOfWeek.MONDAY);
+            LocalDate endOfWeekS = startOfWeekS.plusDays(6);
+            LocalDate startOfMonthS = todayS.with(TemporalAdjusters.firstDayOfMonth());
+            LocalDate endOfMonthS = todayS.with(TemporalAdjusters.lastDayOfMonth());
+            LocalDate startOfYearS = todayS.with(TemporalAdjusters.firstDayOfYear());
+            LocalDate endOfYearS = todayS.with(TemporalAdjusters.lastDayOfYear());
+
+            double salToday = 0.0;
+            double salWeek = 0.0;
+            double salMonth = 0.0;
+            double salYear = 0.0;
+
+            for (BillDTO b : bills) {
+                Date bd = b.getBillDate();
+                LocalDate ld = toLocalSales.apply(bd);
+                if (ld == null) continue;
+                double amt = b.getTotalAmount();
+                if (ld.isEqual(todayS)) salToday += amt;
+                if ((ld.isEqual(startOfWeekS) || ld.isAfter(startOfWeekS)) && (ld.isEqual(endOfWeekS) || ld.isBefore(endOfWeekS))) salWeek += amt;
+                if ((ld.isEqual(startOfMonthS) || ld.isAfter(startOfMonthS)) && (ld.isEqual(endOfMonthS) || ld.isBefore(endOfMonthS))) salMonth += amt;
+                if ((ld.isEqual(startOfYearS) || ld.isAfter(startOfYearS)) && (ld.isEqual(endOfYearS) || ld.isBefore(endOfYearS))) salYear += amt;
+            }
+
+            String sToday = String.format("Rs. %.2f", salToday);
+            String sWeek = String.format("Rs. %.2f", salWeek);
+            String sMonth = String.format("Rs. %.2f", salMonth);
+            String sYear = String.format("Rs. %.2f", salYear);
+        %>
+        <div class="stat-card today">
+            <div class="stat-icon"><i class="far fa-calendar-day"></i></div>
+            <div class="stat-info">
+                <h3><%= sToday %></h3>
+                <p>Today</p>
+            </div>
+        </div>
+        <div class="stat-card week">
+            <div class="stat-icon"><i class="far fa-calendar"></i></div>
+            <div class="stat-info">
+                <h3><%= sWeek %></h3>
+                <p>This Week</p>
+            </div>
+        </div>
+        <div class="stat-card month">
+            <div class="stat-icon"><i class="far fa-calendar-alt"></i></div>
+            <div class="stat-info">
+                <h3><%= sMonth %></h3>
+                <p>This Month</p>
+            </div>
+        </div>
+        <div class="stat-card year">
+            <div class="stat-icon"><i class="far fa-calendar-check"></i></div>
+            <div class="stat-info">
+                <h3><%= sYear %></h3>
+                <p>This Year</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
         <h2><i class="fas fa-chart-line"></i> Cost of Sales</h2>
         <p>Sum of GRN Qty × Buying Price over selected periods</p>
     </div>
@@ -234,6 +304,87 @@
             <div class="stat-icon"><i class="far fa-calendar-check"></i></div>
             <div class="stat-info">
                 <h3><%= fmtYear %></h3>
+                <p>This Year</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <h2><i class="fas fa-hand-holding-usd"></i> Gross Profit</h2>
+        <p>Gross Profit = Sales − Cost of Sales</p>
+    </div>
+    <div class="stats-row">
+        <%
+            java.util.function.Function<Date, LocalDate> toLocalGP = (Date d) -> {
+                if (d == null) return null;
+                return Instant.ofEpochMilli(d.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            };
+
+            LocalDate todayGP = LocalDate.now(ZoneId.systemDefault());
+            LocalDate startOfWeekGP = todayGP.with(java.time.DayOfWeek.MONDAY);
+            LocalDate endOfWeekGP = startOfWeekGP.plusDays(6);
+            LocalDate startOfMonthGP = todayGP.with(TemporalAdjusters.firstDayOfMonth());
+            LocalDate endOfMonthGP = todayGP.with(TemporalAdjusters.lastDayOfMonth());
+            LocalDate startOfYearGP = todayGP.with(TemporalAdjusters.firstDayOfYear());
+            LocalDate endOfYearGP = todayGP.with(TemporalAdjusters.lastDayOfYear());
+
+            double salTodayGP = 0.0, salWeekGP = 0.0, salMonthGP = 0.0, salYearGP = 0.0;
+            for (BillDTO b : bills) {
+                LocalDate ld = toLocalGP.apply(b.getBillDate());
+                if (ld == null) continue;
+                double amt = b.getTotalAmount();
+                if (ld.isEqual(todayGP)) salTodayGP += amt;
+                if ((ld.isEqual(startOfWeekGP) || ld.isAfter(startOfWeekGP)) && (ld.isEqual(endOfWeekGP) || ld.isBefore(endOfWeekGP))) salWeekGP += amt;
+                if ((ld.isEqual(startOfMonthGP) || ld.isAfter(startOfMonthGP)) && (ld.isEqual(endOfMonthGP) || ld.isBefore(endOfMonthGP))) salMonthGP += amt;
+                if ((ld.isEqual(startOfYearGP) || ld.isAfter(startOfYearGP)) && (ld.isEqual(endOfYearGP) || ld.isBefore(endOfYearGP))) salYearGP += amt;
+            }
+
+            double cosTodayGP = 0.0, cosWeekGP = 0.0, cosMonthGP = 0.0, cosYearGP = 0.0;
+            for (VendorDTO v : vendors) {
+                LocalDate ld = toLocalGP.apply(v.getGrnDate());
+                if (ld == null) continue;
+                double line = (double) v.getQty() * v.getBuyingPrice();
+                if (ld.isEqual(todayGP)) cosTodayGP += line;
+                if ((ld.isEqual(startOfWeekGP) || ld.isAfter(startOfWeekGP)) && (ld.isEqual(endOfWeekGP) || ld.isBefore(endOfWeekGP))) cosWeekGP += line;
+                if ((ld.isEqual(startOfMonthGP) || ld.isAfter(startOfMonthGP)) && (ld.isEqual(endOfMonthGP) || ld.isBefore(endOfMonthGP))) cosMonthGP += line;
+                if ((ld.isEqual(startOfYearGP) || ld.isAfter(startOfYearGP)) && (ld.isEqual(endOfYearGP) || ld.isBefore(endOfYearGP))) cosYearGP += line;
+            }
+
+            double gpToday = salTodayGP - cosTodayGP;
+            double gpWeek = salWeekGP - cosWeekGP;
+            double gpMonth = salMonthGP - cosMonthGP;
+            double gpYear = salYearGP - cosYearGP;
+
+            String gpTodayS = String.format("Rs. %.2f", gpToday);
+            String gpWeekS = String.format("Rs. %.2f", gpWeek);
+            String gpMonthS = String.format("Rs. %.2f", gpMonth);
+            String gpYearS = String.format("Rs. %.2f", gpYear);
+        %>
+        <div class="stat-card today">
+            <div class="stat-icon"><i class="far fa-calendar-day"></i></div>
+            <div class="stat-info">
+                <h3><%= gpTodayS %></h3>
+                <p>Today</p>
+            </div>
+        </div>
+        <div class="stat-card week">
+            <div class="stat-icon"><i class="far fa-calendar"></i></div>
+            <div class="stat-info">
+                <h3><%= gpWeekS %></h3>
+                <p>This Week</p>
+            </div>
+        </div>
+        <div class="stat-card month">
+            <div class="stat-icon"><i class="far fa-calendar-alt"></i></div>
+            <div class="stat-info">
+                <h3><%= gpMonthS %></h3>
+                <p>This Month</p>
+            </div>
+        </div>
+        <div class="stat-card year">
+            <div class="stat-icon"><i class="far fa-calendar-check"></i></div>
+            <div class="stat-info">
+                <h3><%= gpYearS %></h3>
                 <p>This Year</p>
             </div>
         </div>
