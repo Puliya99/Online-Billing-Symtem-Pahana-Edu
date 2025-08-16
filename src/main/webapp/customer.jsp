@@ -192,7 +192,7 @@
         </div>
       </div>
       <div class="form-group">
-        <label for="cusUnits">Units Consumed</label>
+        <label for="cusUnits">Purchased Goods</label>
         <div class="input-group">
           <span class="input-group-text"><i class="fas fa-bolt"></i></span>
           <input type="number" class="form-control" id="cusUnits" placeholder="0">
@@ -235,7 +235,7 @@
           <th>Name</th>
           <th>Address</th>
           <th>Contact</th>
-          <th>Units</th>
+          <th>Purchased Goods</th>
         </tr>
         </thead>
         <tbody id="cusTable">
@@ -298,8 +298,8 @@
       alert('Please enter a valid contact number!');
       return false;
     }
-    if (!units || units < 0) {
-      alert('Please enter valid units consumed!');
+    if (Number.isNaN(units) || units < 0) {
+      alert('Please enter a valid goods (0 or greater)!');
       return false;
     }
     return true;
@@ -350,7 +350,7 @@
       }
     }
 
-    console.log('Customer selected, rowIndex:', rowIndex, 'Account ID field value:', document.getElementById('cusId').value); // Debug log
+    console.log('Customer selected, rowIndex:', rowIndex, 'Account ID field value:', document.getElementById('cusId').value);
   }
 
   function updateCustomer() {
