@@ -49,11 +49,12 @@ public class VendorExportController extends HttpServlet {
 
         try (PrintWriter out = resp.getWriter()) {
             out.write('\uFEFF');
-            out.println("grn_id,name,item_id,description,qty,buying_price");
+            out.println("grn_id,grn_date,name,item_id,description,qty,buying_price");
 
             List<VendorDTO> vendors = vendorBO.getAllVendors();
             for (VendorDTO v : vendors) {
                 out.print(escapeCsv(v.getGrnId())); out.print(',');
+                out.print(escapeCsv(formatDate(v.getGrnDate()))); out.print(',');
                 out.print(escapeCsv(v.getName())); out.print(',');
                 out.print(escapeCsv(v.getItemId())); out.print(',');
                 out.print(escapeCsv(v.getDescription())); out.print(',');
@@ -76,6 +77,11 @@ public class VendorExportController extends HttpServlet {
             return '"' + val + '"';
         }
         return val;
+    }
+
+    private String formatDate(java.util.Date d) {
+        if (d == null) return "";
+        return new java.text.SimpleDateFormat("yyyy-MM-dd").format(d);
     }
 
     private String formatNumber(double d) {
