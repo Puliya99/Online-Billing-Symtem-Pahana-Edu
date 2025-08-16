@@ -4,8 +4,13 @@ import com.example.pahanaedubillingsystem.backend.bo.custom.BillBO;
 import com.example.pahanaedubillingsystem.backend.dao.DAOFactory;
 import com.example.pahanaedubillingsystem.backend.dao.custom.BillDAO;
 import com.example.pahanaedubillingsystem.backend.dao.custom.CartDAO;
+import com.example.pahanaedubillingsystem.backend.dao.custom.CartItemDAO;
+import com.example.pahanaedubillingsystem.backend.dao.custom.ItemDAO;
 import com.example.pahanaedubillingsystem.backend.dto.BillDTO;
 import com.example.pahanaedubillingsystem.backend.entity.Bill;
+import com.example.pahanaedubillingsystem.backend.entity.Cart_Item;
+import com.example.pahanaedubillingsystem.backend.entity.Item;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +18,27 @@ import java.util.List;
 public class BillBOImpl implements BillBO {
     private final BillDAO billDAO = (BillDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.BILL);
     private final CartDAO cartDAO = (CartDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CART);
+    private final CartItemDAO cartItemDAO = (CartItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CART_ITEM);
+    private final ItemDAO itemDAO = (ItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.ITEM);
 
     @Override
     public boolean saveBill(BillDTO dto) throws SQLException {
-        return billDAO.save(new Bill(dto.getBillId(), dto.getBillDate(), dto.getAccountNo(), dto.getCartId(), dto.getDiscount(), dto.getTotalAmount()));
+        boolean saved = billDAO.save(new Bill(dto.getBillId(), dto.getBillDate(), dto.getAccountNo(), dto.getCartId(), dto.getDiscount(), dto.getTotalAmount()));
+        if (!saved) return false;
+
+        if (dto.getCartId() != null && !dto.getCartId().isEmpty()) {
+            List<Cart_Item> cartItems = cartItemDAO.findByCartId(dto.getCartId());
+            for (Cart_Item ci : cartItems) {
+                Item item = itemDAO.searchById(ci.getItemId());
+                if (item != null) {
+                    int currentQty = item.getQty();
+                    int newQty = currentQty - ci.getQty();
+                    item.setQty(newQty);
+                    itemDAO.update(item);
+                }
+            }
+        }
+        return true;
     }
 
     @Override
