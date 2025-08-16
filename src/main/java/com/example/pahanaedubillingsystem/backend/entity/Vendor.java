@@ -1,15 +1,19 @@
 package com.example.pahanaedubillingsystem.backend.entity;
 
+import java.util.Date;
+
 public class Vendor {
     private String grnId;
+    private Date grnDate;
     private String name;
     private String itemId;
     private String description;
     private int qty;
     private double buyingPrice;
 
-    public Vendor(String grnId, String name, String itemId, String description, int qty, double buyingPrice) {
+    public Vendor(String grnId, Date grnDate, String name, String itemId, String description, int qty, double buyingPrice) {
         this.grnId = grnId;
+        this.grnDate = grnDate;
         this.name = name;
         this.itemId = itemId;
         this.description = description;
@@ -26,6 +30,14 @@ public class Vendor {
 
     public void setGrnId(String grnId) {
         this.grnId = grnId;
+    }
+
+    public Date getGrnDate() {
+        return grnDate;
+    }
+
+    public void setGrnDate(Date grnDate) {
+        this.grnDate = grnDate;
     }
 
     public String getName() {
@@ -72,6 +84,7 @@ public class Vendor {
     public String toString() {
         return "Vendor{" +
                 "grnId='" + grnId + '\'' +
+                ", grnDate=" + grnDate +
                 ", name='" + name + '\'' +
                 ", itemId='" + itemId + '\'' +
                 ", description='" + description + '\'' +
