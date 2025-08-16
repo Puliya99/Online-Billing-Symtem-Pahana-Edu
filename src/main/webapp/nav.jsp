@@ -165,6 +165,24 @@
     .dark-mode .stat-info p { color: #b0b0b0; }
     .dark-mode .stat-card:hover { box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.4); }
 
+    /* Welcome banner */
+    .dark-mode .welcome-banner {
+        background: #1f1f1f;
+        color: #e0e0e0;
+        border-left-color: #4e73df;
+        box-shadow: 0 0.15rem 1.75rem 0 rgba(0,0,0,0.4);
+    }
+    .dark-mode .welcome-banner h3 { color: #e0e0e0; }
+    .dark-mode .welcome-banner p { color: #b0b0b0; }
+
+    /* Charts containers */
+    .dark-mode .chart-card { background: #1f1f1f; box-shadow: 0 0.15rem 1.75rem 0 rgba(0,0,0,0.4); }
+    .dark-mode .chart-scroll { border-color: #3a3a3a; background: #1f1f1f; }
+
+    /* Card sub-elements */
+    .dark-mode .card-header { background-color: #262626; border-bottom: 1px solid #3a3a3a; color: #e0e0e0; }
+    .dark-mode .total-amount { background-color: #1f1f1f; border-left-color: #1cc88a; }
+
     /* Tables */
     .dark-mode .table { color: #e0e0e0; }
     .dark-mode .table th,
@@ -215,6 +233,13 @@
         border-color: #3a3a3a;
         color: #dcdcdc;
     }
+
+    /* Bill Items Modal overrides */
+    .dark-mode #billItemsModal > div { background: #2b2b2b !important; box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important; }
+    .dark-mode #billItemsModal > div > div:first-child { background: #262626 !important; border-bottom-color: #3a3a3a !important; }
+    .dark-mode #billItemsModal > div > div:first-child h5 { color: #e0e0e0 !important; }
+    .dark-mode #billItemsModal > div > div:last-child { background: #262626 !important; border-top: 1px solid #3a3a3a !important; }
+    .dark-mode #billItemsModalClose { color: #b0b0b0 !important; }
 
     /* Responsive menu */
     .menu-toggle {
@@ -336,6 +361,8 @@
             localStorage.setItem('theme', 'dark');
         }
 
+        try { window.dispatchEvent(new CustomEvent('themechange', { detail: { theme: body.classList.contains('dark-mode') ? 'dark' : 'light' } })); } catch (e) {}
+
         const dropdown = document.querySelector('.user-dropdown');
         if (dropdown) dropdown.style.display = 'none';
     }
@@ -349,7 +376,6 @@
                 el.style.opacity = '0.6';
                 el.style.cursor = 'not-allowed';
                 el.setAttribute('title', 'Delete is allowed only for Admins');
-                // Disable form controls if possible
                 if (typeof el.disabled !== 'undefined') {
                     el.disabled = true;
                 }

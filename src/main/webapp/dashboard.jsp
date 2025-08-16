@@ -466,6 +466,9 @@
     var ctx = document.getElementById('itemsSoldChart');
     if (!ctx) { return; }
 
+    var lastLabels = [];
+    var lastData = [];
+
     function fetchJson(url, cb){
         try {
             var xhr = new XMLHttpRequest();
@@ -498,7 +501,7 @@
                 if (cid && !seen[cid]) { seen[cid]=true; cartIds.push(cid); }
             }
             if (cartIds.length === 0){
-                renderChart([], [], itemNameMap);
+                renderChart([], []);
                 return;
             }
             var totals = {};
@@ -514,7 +517,7 @@
                     });
                     var labels = pairs.map(function(p){ return itemNameMap[p[0]] || p[0]; });
                     var data = pairs.map(function(p){ return p[1]; });
-                    renderChart(labels, data, itemNameMap);
+                    renderChart(labels, data);
                     return;
                 }
                 var cidNow = cartIds[idx++];
@@ -541,11 +544,18 @@
         labels = Array.isArray(labels) ? labels : [];
         data = Array.isArray(data) ? data : [];
         if (labels.length === 0){ labels = ['No Sales']; data = [0]; }
+        lastLabels = labels.slice();
+        lastData = data.slice();
 
         var perLabelWidth = 80;
         var minWidth = Math.max(600, labels.length * perLabelWidth);
         var inner = document.querySelector('.chart-inner');
         if (inner){ inner.style.width = minWidth + 'px'; }
+
+        var isDark = document.body.classList.contains('dark-mode');
+        var axisColor = isDark ? '#cfd8dc' : '#4b5563';
+        var gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+        var legendColor = isDark ? '#e0e0e0' : '#333';
 
         var config = {
             type: 'line',
@@ -555,7 +565,7 @@
                     label: 'Qty Sold',
                     data: data,
                     borderColor: '#4e73df',
-                    backgroundColor: 'rgba(78,115,223,0.1)',
+                    backgroundColor: isDark ? 'rgba(78,115,223,0.12)' : 'rgba(78,115,223,0.1)',
                     fill: true,
                     tension: 0.2,
                     pointRadius: 3,
@@ -566,11 +576,21 @@
                 responsive: false,
                 maintainAspectRatio: false,
                 scales: {
-                    x: { title: { display: true, text: 'Items' } },
-                    y: { title: { display: true, text: 'Qty Sold' }, beginAtZero: true, precision: 0 }
+                    x: {
+                        title: { display: true, text: 'Items', color: axisColor },
+                        ticks: { color: axisColor },
+                        grid: { color: gridColor }
+                    },
+                    y: {
+                        title: { display: true, text: 'Qty Sold', color: axisColor },
+                        ticks: { color: axisColor },
+                        grid: { color: gridColor },
+                        beginAtZero: true,
+                        precision: 0
+                    }
                 },
                 plugins: {
-                    legend: { display: true },
+                    legend: { display: true, labels: { color: legendColor } },
                     tooltip: { enabled: true }
                 }
             }
@@ -578,6 +598,10 @@
         if (chartInstance){ chartInstance.destroy(); }
         chartInstance = new Chart(ctx.getContext('2d'), config);
     }
+
+    window.addEventListener('themechange', function(){
+        renderChart(lastLabels, lastData);
+    });
 })();
 </script>
 </body>
