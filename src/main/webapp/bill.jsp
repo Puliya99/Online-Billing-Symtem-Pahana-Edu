@@ -196,7 +196,7 @@
                     <label for="billDate">Date</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
-                        <input type="text" class="form-control" id="billDate" disabled>
+                        <input type="date" class="form-control" id="billDate">
                     </div>
                 </div>
             </div>
@@ -382,7 +382,7 @@
                         %>
                         <tr data-bill-id="<%= bill.getBillId() %>">
                             <td><%= bill.getBillId() %></td>
-                            <td><%= bill.getBillDate() %></td>
+                            <td><%= bill.getBillDate() != null ? new java.text.SimpleDateFormat("yyyy-MM-dd").format(bill.getBillDate()) : "" %></td>
                             <td><%= bill.getAccountNo() %></td>
                             <td><%= bill.getCartId() %></td>
                             <td><%= bill.getDiscount() %></td>
@@ -843,6 +843,10 @@
             alert('Please select a customer');
             return;
         }
+        if (!billDate) {
+            alert('Please select a date for the bill');
+            return;
+        }
         if (!cartId) {
             alert('No cart found. Please add at least one item first.');
             return;
@@ -928,6 +932,13 @@
         document.getElementById('billCusId').value = accountNo;
         document.getElementById('cartId').value = cartId || '';
         document.getElementById('discount').value = discount || 0;
+        try {
+            const row = findBillRow(billId);
+            if (row && row.cells && row.cells[1]) {
+                const d = (row.cells[1].textContent || '').trim();
+                if (d) document.getElementById('billDate').value = d;
+            }
+        } catch (e) { /* ignore */ }
 
         loadCustomerDetails();
 
@@ -959,6 +970,10 @@
 
         if (!accountNo || !cartId) {
             alert('Please select a customer and ensure cart exists!');
+            return;
+        }
+        if (!billDate) {
+            alert('Please select a date for the bill');
             return;
         }
 
