@@ -7,6 +7,10 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.util.List, com.example.pahanaedubillingsystem.backend.dto.CustomerDTO, com.example.pahanaedubillingsystem.backend.dto.ItemDTO, com.example.pahanaedubillingsystem.backend.dto.BillDTO, com.example.pahanaedubillingsystem.backend.bo.BOFactory, com.example.pahanaedubillingsystem.backend.bo.custom.CustomerBO, com.example.pahanaedubillingsystem.backend.bo.custom.ItemBO, com.example.pahanaedubillingsystem.backend.bo.custom.BillBO" %>
+<%@ page import="com.example.pahanaedubillingsystem.backend.bo.custom.VendorBO" %>
+<%@ page import="com.example.pahanaedubillingsystem.backend.dto.VendorDTO" %>
+<%@ page import="com.example.pahanaedubillingsystem.backend.bo.custom.UserBO" %>
+<%@ page import="com.example.pahanaedubillingsystem.backend.dto.UserDTO" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,6 +71,8 @@
         .stat-card.customers { border-left-color: #4e73df; }
         .stat-card.items { border-left-color: #36b9cc; }
         .stat-card.bills { border-left-color: #1cc88a; }
+        .stat-card.vendors { border-left-color: #f6c23e; }
+        .stat-card.users { border-left-color: #e74a3b; }
         .stat-icon {
             width: 50px;
             height: 50px;
@@ -81,6 +87,8 @@
         .stat-card.customers .stat-icon { background-color: #4e73df; }
         .stat-card.items .stat-icon { background-color: #36b9cc; }
         .stat-card.bills .stat-icon { background-color: #1cc88a; }
+        .stat-card.vendors .stat-icon { background-color: #f6c23e; }
+        .stat-card.users .stat-icon { background-color: #e74a3b; }
         .stat-info h3 {
             font-size: 1.75rem;
             font-weight: 700;
@@ -104,10 +112,14 @@
         <%
             CustomerBO customerBO = (CustomerBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.CUSTOMER);
             ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
+            VendorBO vendorBO = (VendorBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.VENDOR);
             BillBO billBO = (BillBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.BILL);
             List<CustomerDTO> customers = customerBO.getAllCustomers();
             List<ItemDTO> items = itemBO.getAllItems();
+            List<VendorDTO> vendors = vendorBO.getAllVendors();
             List<BillDTO> bills = billBO.getAllBills();
+            UserBO userBO = (UserBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.USER);
+            List<UserDTO> users = userBO.getAllUsers();
         %>
         <div class="stat-card customers">
             <div class="stat-icon"><i class="fas fa-users"></i></div>
@@ -128,6 +140,20 @@
             <div class="stat-info">
                 <h3><%= bills.size() %></h3>
                 <p>Bills Today</p>
+            </div>
+        </div>
+        <div class="stat-card vendors">
+            <div class="stat-icon"><i class="fas fa-truck"></i></div>
+            <div class="stat-info">
+                <h3><%= vendors.size() %></h3>
+                <p>Vendors</p>
+            </div>
+        </div>
+        <div class="stat-card users">
+            <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+            <div class="stat-info">
+                <h3><%= users.size() %></h3>
+                <p>Users</p>
             </div>
         </div>
     </div>
