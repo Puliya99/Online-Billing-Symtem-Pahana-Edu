@@ -6,19 +6,15 @@ public class Bill {
     private String billId;
     private Date billDate;
     private String accountNo;
-    private String itemId;
-    private int qty;
-    private double unitPrice;
-    private double discount;
+    private String cartId;
+    private int discount;
     private double totalAmount;
 
-    public Bill(String billId, Date billDate, String accountNo, String itemId, int qty, double unitPrice, double discount, double totalAmount) {
+    public Bill(String billId, Date billDate, String accountNo, String cartId, int discount, double totalAmount) {
         this.billId = billId;
         this.billDate = billDate;
         this.accountNo = accountNo;
-        this.itemId = itemId;
-        this.qty = qty;
-        this.unitPrice = unitPrice;
+        this.cartId = cartId;
         this.discount = discount;
         this.totalAmount = totalAmount;
     }
@@ -50,35 +46,19 @@ public class Bill {
         this.accountNo = accountNo;
     }
 
-    public String getItemId() {
-        return itemId;
+    public String getCartId() {
+        return cartId;
     }
 
-    public void setItemId(String itemId) {
-        this.itemId = itemId;
+    public void setCartId(String cartId) {
+        this.cartId = cartId;
     }
 
-    public int getQty() {
-        return qty;
-    }
-
-    public void setQty(int qty) {
-        this.qty = qty;
-    }
-
-    public double getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(double unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public double getDiscount() {
+    public int getDiscount() {
         return discount;
     }
 
-    public void setDiscount(double discount) {
+    public void setDiscount(int discount) {
         this.discount = discount;
     }
 
@@ -96,9 +76,7 @@ public class Bill {
                 "billId='" + billId + '\'' +
                 ", billDate=" + billDate +
                 ", accountNo='" + accountNo + '\'' +
-                ", itemId='" + itemId + '\'' +
-                ", qty=" + qty +
-                ", unitPrice=" + unitPrice +
+                ", cartId='" + cartId + '\'' +
                 ", discount=" + discount +
                 ", totalAmount=" + totalAmount +
                 '}';
