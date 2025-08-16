@@ -39,7 +39,7 @@ public class VendorDAOImpl implements VendorDAO {
 
     @Override
     public Vendor search(String grnId) throws SQLException {
-        ResultSet rst = SQLUtil.execute("SELECT * FROM vendors WHERE grn_id = ?", grnId);
+        ResultSet rst = SQLUtil.execute("SELECT * FROM vendor WHERE grn_id = ?", grnId);
         if (rst.next()) {
             return new Vendor(rst.getString("grn_id"), rst.getString("name"), rst.getString("item_id"), rst.getString("description"), rst.getInt("qty"), rst.getDouble("buying_price"));
         }
@@ -59,7 +59,7 @@ public class VendorDAOImpl implements VendorDAO {
     @Override
     public List<String> getIds() throws SQLException {
         List<String> ids = new ArrayList<>();
-        ResultSet rst = SQLUtil.execute("SELECT grn_id FROM vendors");
+        ResultSet rst = SQLUtil.execute("SELECT grn_id FROM vendor");
         while (rst.next()) {
             ids.add(rst.getString(1));
         }
@@ -68,7 +68,7 @@ public class VendorDAOImpl implements VendorDAO {
 
     @Override
     public Vendor searchById(String grnId) throws SQLException {
-        ResultSet rst = SQLUtil.execute("SELECT * FROM vendors WHERE grn_id = ?", grnId);
+        ResultSet rst = SQLUtil.execute("SELECT * FROM vendor WHERE grn_id = ?", grnId);
         if (rst.next()) {
             return new Vendor(rst.getString("grn_id"), rst.getString("name"), rst.getString("item_id"), rst.getString("description"), rst.getInt("qty"), rst.getDouble("buying_price"));
         }
