@@ -135,18 +135,18 @@
                 <p>Items</p>
             </div>
         </div>
-        <div class="stat-card bills">
-            <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-            <div class="stat-info">
-                <h3><%= bills.size() %></h3>
-                <p>Bills Today</p>
-            </div>
-        </div>
         <div class="stat-card vendors">
             <div class="stat-icon"><i class="fas fa-truck"></i></div>
             <div class="stat-info">
                 <h3><%= vendors.size() %></h3>
                 <p>Vendors</p>
+            </div>
+        </div>
+        <div class="stat-card bills">
+            <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+            <div class="stat-info">
+                <h3><%= bills.size() %></h3>
+                <p>Bills Today</p>
             </div>
         </div>
         <div class="stat-card users">
