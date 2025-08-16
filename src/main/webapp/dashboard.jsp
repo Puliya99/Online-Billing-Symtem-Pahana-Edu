@@ -6,11 +6,13 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List, com.example.pahanaedubillingsystem.backend.dto.CustomerDTO, com.example.pahanaedubillingsystem.backend.dto.ItemDTO, com.example.pahanaedubillingsystem.backend.dto.BillDTO, com.example.pahanaedubillingsystem.backend.bo.BOFactory, com.example.pahanaedubillingsystem.backend.bo.custom.CustomerBO, com.example.pahanaedubillingsystem.backend.bo.custom.ItemBO, com.example.pahanaedubillingsystem.backend.bo.custom.BillBO" %>
+<%@ page import="java.util.List, java.util.Date, com.example.pahanaedubillingsystem.backend.dto.CustomerDTO, com.example.pahanaedubillingsystem.backend.dto.ItemDTO, com.example.pahanaedubillingsystem.backend.dto.BillDTO, com.example.pahanaedubillingsystem.backend.bo.BOFactory, com.example.pahanaedubillingsystem.backend.bo.custom.CustomerBO, com.example.pahanaedubillingsystem.backend.bo.custom.ItemBO, com.example.pahanaedubillingsystem.backend.bo.custom.BillBO" %>
 <%@ page import="com.example.pahanaedubillingsystem.backend.bo.custom.VendorBO" %>
 <%@ page import="com.example.pahanaedubillingsystem.backend.dto.VendorDTO" %>
 <%@ page import="com.example.pahanaedubillingsystem.backend.bo.custom.UserBO" %>
 <%@ page import="com.example.pahanaedubillingsystem.backend.dto.UserDTO" %>
+<%@ page import="java.time.*" %>
+<%@ page import="java.time.temporal.TemporalAdjusters" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,6 +75,10 @@
         .stat-card.bills { border-left-color: #1cc88a; }
         .stat-card.vendors { border-left-color: #f6c23e; }
         .stat-card.users { border-left-color: #e74a3b; }
+        .stat-card.today { border-left-color: #4e73df; }
+        .stat-card.week { border-left-color: #36b9cc; }
+        .stat-card.month { border-left-color: #f6c23e; }
+        .stat-card.year { border-left-color: #e74a3b; }
         .stat-icon {
             width: 50px;
             height: 50px;
@@ -89,6 +95,10 @@
         .stat-card.bills .stat-icon { background-color: #1cc88a; }
         .stat-card.vendors .stat-icon { background-color: #f6c23e; }
         .stat-card.users .stat-icon { background-color: #e74a3b; }
+        .stat-card.today .stat-icon { background-color: #4e73df; }
+        .stat-card.week .stat-icon { background-color: #36b9cc; }
+        .stat-card.month .stat-icon { background-color: #f6c23e; }
+        .stat-card.year .stat-icon { background-color: #e74a3b; }
         .stat-info h3 {
             font-size: 1.75rem;
             font-weight: 700;
@@ -108,6 +118,7 @@
         <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
         <p>Overview of your billing system</p>
     </div>
+
     <div class="stats-row">
         <%
             CustomerBO customerBO = (CustomerBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.CUSTOMER);
@@ -139,14 +150,14 @@
             <div class="stat-icon"><i class="fas fa-truck"></i></div>
             <div class="stat-info">
                 <h3><%= vendors.size() %></h3>
-                <p>Vendors</p>
+                <p>GRN</p>
             </div>
         </div>
         <div class="stat-card bills">
             <div class="stat-icon"><i class="fas fa-file-invoice-dollar"></i></div>
             <div class="stat-info">
                 <h3><%= bills.size() %></h3>
-                <p>Bills Today</p>
+                <p>Bills</p>
             </div>
         </div>
         <div class="stat-card users">
@@ -154,6 +165,76 @@
             <div class="stat-info">
                 <h3><%= users.size() %></h3>
                 <p>Users</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <h2><i class="fas fa-chart-line"></i> Cost of Sales</h2>
+        <p>Sum of GRN Qty × Buying Price over selected periods</p>
+    </div>
+    <div class="stats-row">
+        <%
+            java.util.function.Function<Date, LocalDate> toLocal = (Date d) -> {
+                if (d == null) return null;
+                return Instant.ofEpochMilli(d.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+            };
+
+            LocalDate today = LocalDate.now(ZoneId.systemDefault());
+            LocalDate startOfWeek = today.with(java.time.DayOfWeek.MONDAY);
+            LocalDate endOfWeek = startOfWeek.plusDays(6);
+            LocalDate startOfMonth = today.with(TemporalAdjusters.firstDayOfMonth());
+            LocalDate endOfMonth = today.with(TemporalAdjusters.lastDayOfMonth());
+            LocalDate startOfYear = today.with(TemporalAdjusters.firstDayOfYear());
+            LocalDate endOfYear = today.with(TemporalAdjusters.lastDayOfYear());
+
+            double cosToday = 0.0;
+            double cosWeek = 0.0;
+            double cosMonth = 0.0;
+            double cosYear = 0.0;
+
+            for (VendorDTO v : vendors) {
+                Date gd = v.getGrnDate();
+                LocalDate ld = toLocal.apply(gd);
+                if (ld == null) continue;
+                double line = (double) v.getQty() * v.getBuyingPrice();
+                if (ld.isEqual(today)) cosToday += line;
+                if ((ld.isEqual(startOfWeek) || ld.isAfter(startOfWeek)) && (ld.isEqual(endOfWeek) || ld.isBefore(endOfWeek))) cosWeek += line;
+                if ((ld.isEqual(startOfMonth) || ld.isAfter(startOfMonth)) && (ld.isEqual(endOfMonth) || ld.isBefore(endOfMonth))) cosMonth += line;
+                if ((ld.isEqual(startOfYear) || ld.isAfter(startOfYear)) && (ld.isEqual(endOfYear) || ld.isBefore(endOfYear))) cosYear += line;
+            }
+
+            String fmtToday = String.format("Rs. %.2f", cosToday);
+            String fmtWeek = String.format("Rs. %.2f", cosWeek);
+            String fmtMonth = String.format("Rs. %.2f", cosMonth);
+            String fmtYear = String.format("Rs. %.2f", cosYear);
+        %>
+        <div class="stat-card today">
+            <div class="stat-icon"><i class="far fa-calendar-day"></i></div>
+            <div class="stat-info">
+                <h3><%= fmtToday %></h3>
+                <p>Today</p>
+            </div>
+        </div>
+        <div class="stat-card week">
+            <div class="stat-icon"><i class="far fa-calendar"></i></div>
+            <div class="stat-info">
+                <h3><%= fmtWeek %></h3>
+                <p>This Week</p>
+            </div>
+        </div>
+        <div class="stat-card month">
+            <div class="stat-icon"><i class="far fa-calendar-alt"></i></div>
+            <div class="stat-info">
+                <h3><%= fmtMonth %></h3>
+                <p>This Month</p>
+            </div>
+        </div>
+        <div class="stat-card year">
+            <div class="stat-icon"><i class="far fa-calendar-check"></i></div>
+            <div class="stat-info">
+                <h3><%= fmtYear %></h3>
+                <p>This Year</p>
             </div>
         </div>
     </div>
