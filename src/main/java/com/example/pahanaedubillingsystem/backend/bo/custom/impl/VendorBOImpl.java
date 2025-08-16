@@ -3,7 +3,9 @@ package com.example.pahanaedubillingsystem.backend.bo.custom.impl;
 import com.example.pahanaedubillingsystem.backend.bo.custom.VendorBO;
 import com.example.pahanaedubillingsystem.backend.dao.DAOFactory;
 import com.example.pahanaedubillingsystem.backend.dao.SQLUtil;
+import com.example.pahanaedubillingsystem.backend.dao.custom.ItemDAO;
 import com.example.pahanaedubillingsystem.backend.dao.custom.VendorDAO;
+import com.example.pahanaedubillingsystem.backend.entity.Item;
 import com.example.pahanaedubillingsystem.backend.dto.VendorDTO;
 import com.example.pahanaedubillingsystem.backend.entity.Vendor;
 import java.sql.SQLException;
@@ -12,22 +14,59 @@ import java.util.List;
 
 public class VendorBOImpl implements VendorBO {
     private final VendorDAO vendorDAO = (VendorDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.VENDOR);
+    private final ItemDAO itemDAO = (ItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.ITEM);
+
     @Override
     public boolean saveVendor(VendorDTO dto) throws SQLException {
         boolean saved = vendorDAO.save(new Vendor(dto.getGrnId(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
         if (!saved) return false;
-        Boolean updated = SQLUtil.execute("UPDATE items SET qty = qty + ? WHERE item_id = ?", dto.getQty(), dto.getItemId());
-        return Boolean.TRUE.equals(updated);
+        return applyItemQtyDelta(dto.getItemId(), dto.getQty());
     }
 
     @Override
     public boolean updateVendor(VendorDTO dto) throws SQLException {
-        return vendorDAO.update(new Vendor(dto.getGrnId(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
+        Vendor existing = vendorDAO.searchById(dto.getGrnId());
+        boolean updated = vendorDAO.update(new Vendor(dto.getGrnId(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
+        if (!updated) return false;
+
+        if (existing == null) {
+            return applyItemQtyDelta(dto.getItemId(), dto.getQty());
+        }
+
+        String oldItemId = existing.getItemId();
+        int oldQty = existing.getQty();
+        String newItemId = dto.getItemId();
+        int newQty = dto.getQty();
+
+        boolean ok = true;
+        if (oldItemId != null && !oldItemId.equals(newItemId)) {
+            ok &= applyItemQtyDelta(oldItemId, -oldQty);
+            ok &= applyItemQtyDelta(newItemId, newQty);
+        } else {
+            // Same item: apply delta
+            int delta = newQty - oldQty;
+            if (delta != 0) ok &= applyItemQtyDelta(newItemId, delta);
+        }
+        return ok;
     }
 
     @Override
     public boolean deleteVendor(String grnId) throws SQLException {
-        return vendorDAO.delete(grnId);
+        Vendor existing = vendorDAO.searchById(grnId);
+        boolean deleted = vendorDAO.delete(grnId);
+        if (!deleted) return false;
+        if (existing == null) return true;
+        return applyItemQtyDelta(existing.getItemId(), -existing.getQty());
+    }
+
+    private boolean applyItemQtyDelta(String itemId, int delta) throws SQLException {
+        if (itemId == null || itemId.isEmpty() || delta == 0) return true;
+        Item item = itemDAO.searchById(itemId);
+        if (item == null) return false;
+        int newQty = item.getQty() + delta;
+        if (newQty < 0) newQty = 0;
+        item.setQty(newQty);
+        return itemDAO.update(item);
     }
 
     @Override
