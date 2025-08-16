@@ -1,15 +1,22 @@
 package com.example.pahanaedubillingsystem.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import java.util.Date;
+
 public class VendorDTO {
     private String grnId;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "UTC")
+    private Date grnDate;
     private String name;
     private String itemId;
     private String description;
     private int qty;
     private double buyingPrice;
 
-    public VendorDTO(String grnId, String name, String itemId, String description, int qty, double buyingPrice) {
+    public VendorDTO(String grnId, Date grnDate, String name, String itemId, String description, int qty, double buyingPrice) {
         this.grnId = grnId;
+        this.grnDate = grnDate;
         this.name = name;
         this.itemId = itemId;
         this.description = description;
@@ -26,6 +33,14 @@ public class VendorDTO {
 
     public void setGrnId(String grnId) {
         this.grnId = grnId;
+    }
+
+    public Date getGrnDate() {
+        return grnDate;
+    }
+
+    public void setGrnDate(Date grnDate) {
+        this.grnDate = grnDate;
     }
 
     public String getName() {
@@ -72,6 +87,7 @@ public class VendorDTO {
     public String toString() {
         return "VendorDTO{" +
                 "grnId='" + grnId + '\'' +
+                ", grnDate=" + grnDate +
                 ", name='" + name + '\'' +
                 ", itemId='" + itemId + '\'' +
                 ", description='" + description + '\'' +
