@@ -119,6 +119,43 @@
         <p>Overview of your billing system</p>
     </div>
 
+    <%
+        ZoneId SL_ZONE = ZoneId.of("Asia/Colombo");
+        java.time.ZonedDateTime nowSL = java.time.ZonedDateTime.now(SL_ZONE);
+        java.time.LocalTime tSL = nowSL.toLocalTime();
+        String greeting;
+        if (tSL.isBefore(java.time.LocalTime.NOON)) {
+            greeting = "Good Morning";
+        } else if (tSL.isBefore(java.time.LocalTime.of(18, 0))) {
+            greeting = "Good Afternoon";
+        } else {
+            greeting = "Good Evening";
+        }
+        String currentUser = (session != null && session.getAttribute("username") != null) ? session.getAttribute("username").toString() : "User";
+        java.time.format.DateTimeFormatter dtFmt = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm a");
+        String slTime = nowSL.format(dtFmt);
+    %>
+    <style>
+        .welcome-banner {
+            background: #fff;
+            border-left: 0.25rem solid #4e73df;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.1);
+            padding: 1rem 1.25rem;
+            border-radius: 0.35rem;
+            margin-bottom: 1.5rem;
+        }
+        .welcome-banner h3 {
+            margin: 0 0 0.25rem 0;
+            color: #5a5c69;
+            font-weight: 700;
+        }
+        .welcome-banner p { margin: 0; color: #858796; }
+    </style>
+    <div class="welcome-banner">
+        <h3>Hi <%= currentUser %>, <%= greeting %>!</h3>
+        <p>Welcome to Pahana Edu Billing System &middot; Sri Lanka Time: <%= slTime %></p>
+    </div>
+
     <div class="stats-row">
         <%
             CustomerBO customerBO = (CustomerBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.CUSTOMER);
@@ -165,6 +202,37 @@
             <div class="stat-info">
                 <h3><%= users.size() %></h3>
                 <p>Users</p>
+            </div>
+        </div>
+    </div>
+    <div class="section-header">
+        <h2><i class="fas fa-chart-area"></i> Items Sold</h2>
+        <p>Total quantity sold per item across all bills</p>
+    </div>
+    <style>
+        .chart-card {
+            background: #fff;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58,59,69,0.1);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        .chart-scroll {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid #e3e6f0;
+            border-radius: 0.35rem;
+            background: #fff;
+        }
+        .chart-inner {
+            min-height: 360px;
+        }
+    </style>
+    <div class="chart-card">
+        <div class="chart-scroll">
+            <div class="chart-inner">
+                <canvas id="itemsSoldChart" height="360"></canvas>
             </div>
         </div>
     </div>
@@ -390,5 +458,127 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+    var BASE = '<%= request.getContextPath() %>';
+    var ctx = document.getElementById('itemsSoldChart');
+    if (!ctx) { return; }
+
+    function fetchJson(url, cb){
+        try {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            xhr.onreadystatechange = function(){
+                if (xhr.readyState === 4){
+                    if (xhr.status === 200){
+                        try { cb(null, JSON.parse(xhr.responseText || '[]')); }
+                        catch(e){ cb(e); }
+                    } else { cb(new Error('HTTP '+xhr.status)); }
+                }
+            };
+            xhr.send();
+        } catch(e){ cb(e); }
+    }
+
+    fetchJson(BASE + '/ItemModel', function(err, items){
+        if (err) { console.warn('Failed to load items', err); items = []; }
+        var itemNameMap = {};
+        for (var i=0;i<items.length;i++){
+            var it = items[i] || {};
+            itemNameMap[it.itemId] = it.name || it.itemId || '';
+        }
+        fetchJson(BASE + '/BillModel', function(err2, bills){
+            if (err2) { console.warn('Failed to load bills', err2); bills = []; }
+            var cartIds = [];
+            var seen = {};
+            for (var j=0;j<bills.length;j++){
+                var cid = bills[j] && bills[j].cartId;
+                if (cid && !seen[cid]) { seen[cid]=true; cartIds.push(cid); }
+            }
+            if (cartIds.length === 0){
+                renderChart([], [], itemNameMap);
+                return;
+            }
+            var totals = {};
+            var idx = 0;
+            function next(){
+                if (idx >= cartIds.length){
+                    var pairs = [];
+                    for (var k in totals){ if (Object.prototype.hasOwnProperty.call(totals,k)) { pairs.push([k, totals[k]]); } }
+                    pairs.sort(function(a,b){
+                        var an = itemNameMap[a[0]] || a[0];
+                        var bn = itemNameMap[b[0]] || b[0];
+                        return String(an).localeCompare(String(bn));
+                    });
+                    var labels = pairs.map(function(p){ return itemNameMap[p[0]] || p[0]; });
+                    var data = pairs.map(function(p){ return p[1]; });
+                    renderChart(labels, data, itemNameMap);
+                    return;
+                }
+                var cidNow = cartIds[idx++];
+                fetchJson(BASE + '/CartItemModel?cart_id=' + encodeURIComponent(cidNow), function(e3, cartItems){
+                    if (!e3 && Array.isArray(cartItems)){
+                        for (var m=0;m<cartItems.length;m++){
+                            var ci = cartItems[m] || {};
+                            var iid = ci.itemId;
+                            var q = Number(ci.qty)||0;
+                            if (!iid) continue;
+                            if (!totals[iid]) totals[iid]=0;
+                            totals[iid]+=q;
+                        }
+                    }
+                    next();
+                });
+            }
+            next();
+        });
+    });
+
+    var chartInstance = null;
+    function renderChart(labels, data){
+        labels = Array.isArray(labels) ? labels : [];
+        data = Array.isArray(data) ? data : [];
+        if (labels.length === 0){ labels = ['No Sales']; data = [0]; }
+
+        var perLabelWidth = 80;
+        var minWidth = Math.max(600, labels.length * perLabelWidth);
+        var inner = document.querySelector('.chart-inner');
+        if (inner){ inner.style.width = minWidth + 'px'; }
+
+        var config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Qty Sold',
+                    data: data,
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78,115,223,0.1)',
+                    fill: true,
+                    tension: 0.2,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#4e73df'
+                }]
+            },
+            options: {
+                responsive: false,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { title: { display: true, text: 'Items' } },
+                    y: { title: { display: true, text: 'Qty Sold' }, beginAtZero: true, precision: 0 }
+                },
+                plugins: {
+                    legend: { display: true },
+                    tooltip: { enabled: true }
+                }
+            }
+        };
+        if (chartInstance){ chartInstance.destroy(); }
+        chartInstance = new Chart(ctx.getContext('2d'), config);
+    }
+})();
+</script>
 </body>
 </html>
