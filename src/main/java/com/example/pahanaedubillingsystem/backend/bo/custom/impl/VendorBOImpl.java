@@ -2,7 +2,6 @@ package com.example.pahanaedubillingsystem.backend.bo.custom.impl;
 
 import com.example.pahanaedubillingsystem.backend.bo.custom.VendorBO;
 import com.example.pahanaedubillingsystem.backend.dao.DAOFactory;
-import com.example.pahanaedubillingsystem.backend.dao.SQLUtil;
 import com.example.pahanaedubillingsystem.backend.dao.custom.ItemDAO;
 import com.example.pahanaedubillingsystem.backend.dao.custom.VendorDAO;
 import com.example.pahanaedubillingsystem.backend.entity.Item;
@@ -18,7 +17,7 @@ public class VendorBOImpl implements VendorBO {
 
     @Override
     public boolean saveVendor(VendorDTO dto) throws SQLException {
-        boolean saved = vendorDAO.save(new Vendor(dto.getGrnId(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
+        boolean saved = vendorDAO.save(new Vendor(dto.getGrnId(), dto.getGrnDate(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
         if (!saved) return false;
         return applyItemQtyDelta(dto.getItemId(), dto.getQty());
     }
@@ -26,7 +25,7 @@ public class VendorBOImpl implements VendorBO {
     @Override
     public boolean updateVendor(VendorDTO dto) throws SQLException {
         Vendor existing = vendorDAO.searchById(dto.getGrnId());
-        boolean updated = vendorDAO.update(new Vendor(dto.getGrnId(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
+        boolean updated = vendorDAO.update(new Vendor(dto.getGrnId(), dto.getGrnDate(), dto.getName(), dto.getItemId(), dto.getDescription(), dto.getQty(), dto.getBuyingPrice()));
         if (!updated) return false;
 
         if (existing == null) {
@@ -43,7 +42,6 @@ public class VendorBOImpl implements VendorBO {
             ok &= applyItemQtyDelta(oldItemId, -oldQty);
             ok &= applyItemQtyDelta(newItemId, newQty);
         } else {
-            // Same item: apply delta
             int delta = newQty - oldQty;
             if (delta != 0) ok &= applyItemQtyDelta(newItemId, delta);
         }
@@ -73,7 +71,7 @@ public class VendorBOImpl implements VendorBO {
     public VendorDTO searchVendor(String grnId) throws SQLException {
         Vendor vendor = vendorDAO.search(grnId);
         if (vendor != null) {
-            return new VendorDTO(vendor.getGrnId(), vendor.getName(), vendor.getItemId(), vendor.getDescription(), vendor.getQty(), vendor.getBuyingPrice());
+            return new VendorDTO(vendor.getGrnId(), vendor.getGrnDate(), vendor.getName(), vendor.getItemId(), vendor.getDescription(), vendor.getQty(), vendor.getBuyingPrice());
         }
         return null;
     }
@@ -83,7 +81,7 @@ public class VendorBOImpl implements VendorBO {
         List<VendorDTO> vendors = new ArrayList<>();
         List<Vendor> all = vendorDAO.getAll();
         for (Vendor v : all) {
-            vendors.add(new VendorDTO(v.getGrnId(), v.getName(), v.getItemId(), v.getDescription(), v.getQty(), v.getBuyingPrice()));
+            vendors.add(new VendorDTO(v.getGrnId(), v.getGrnDate(), v.getName(), v.getItemId(), v.getDescription(), v.getQty(), v.getBuyingPrice()));
         }
         return vendors;
     }
@@ -97,7 +95,7 @@ public class VendorBOImpl implements VendorBO {
     public VendorDTO searchByIdVendor(String grnId) throws SQLException {
         Vendor vendor = vendorDAO.searchById(grnId);
         if (vendor != null) {
-            return new VendorDTO(vendor.getGrnId(), vendor.getName(), vendor.getItemId(), vendor.getDescription(), vendor.getQty(), vendor.getBuyingPrice());
+            return new VendorDTO(vendor.getGrnId(), vendor.getGrnDate(), vendor.getName(), vendor.getItemId(), vendor.getDescription(), vendor.getQty(), vendor.getBuyingPrice());
         }
         return null;
     }
