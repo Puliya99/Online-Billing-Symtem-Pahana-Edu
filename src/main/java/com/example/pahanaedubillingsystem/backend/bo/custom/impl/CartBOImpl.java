@@ -12,6 +12,9 @@ import java.util.List;
 
 public class CartBOImpl implements CartBO {
     private final CartDAO cartDAO = (CartDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CART);
+    private final com.example.pahanaedubillingsystem.backend.dao.custom.BillDAO billDAO = (com.example.pahanaedubillingsystem.backend.dao.custom.BillDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.BILL);
+    private final com.example.pahanaedubillingsystem.backend.dao.custom.CartItemDAO cartItemDAO = (com.example.pahanaedubillingsystem.backend.dao.custom.CartItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CART_ITEM);
+    private final com.example.pahanaedubillingsystem.backend.dao.custom.ItemDAO itemDAO = (com.example.pahanaedubillingsystem.backend.dao.custom.ItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.ITEM);
 
     @Override
     public boolean saveCart(CartDTO dto) throws SQLException {
@@ -25,6 +28,22 @@ public class CartBOImpl implements CartBO {
 
     @Override
     public boolean deleteCart(String cartId) throws SQLException {
+        if (cartId != null && !cartId.isEmpty()) {
+            List<com.example.pahanaedubillingsystem.backend.entity.Bill> bills = billDAO.getAll();
+            for (com.example.pahanaedubillingsystem.backend.entity.Bill b : bills) {
+                if (cartId.equals(b.getCartId())) {
+                    List<com.example.pahanaedubillingsystem.backend.entity.Cart_Item> items = cartItemDAO.findByCartId(cartId);
+                    for (com.example.pahanaedubillingsystem.backend.entity.Cart_Item ci : items) {
+                        com.example.pahanaedubillingsystem.backend.entity.Item it = itemDAO.searchById(ci.getItemId());
+                        if (it != null) {
+                            it.setQty(it.getQty() + ci.getQty());
+                            itemDAO.update(it);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
         return cartDAO.delete(cartId);
     }
 

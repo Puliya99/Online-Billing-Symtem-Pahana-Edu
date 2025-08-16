@@ -60,11 +60,91 @@ public class BillBOImpl implements BillBO {
 
     @Override
     public boolean updateBill(BillDTO dto) throws SQLException {
+        Bill existing = billDAO.searchById(dto.getBillId());
+        if (existing != null) {
+            String oldCartId = existing.getCartId();
+            if (oldCartId != null && !oldCartId.isEmpty()) {
+                List<Cart_Item> oldItems = cartItemDAO.findByCartId(oldCartId);
+                for (Cart_Item ci : oldItems) {
+                    Item item = itemDAO.searchById(ci.getItemId());
+                    if (item != null) {
+                        item.setQty(item.getQty() + ci.getQty());
+                        itemDAO.update(item);
+                    }
+                }
+            }
+            String oldAccount = existing.getAccountNo();
+            if (oldAccount != null && !oldAccount.isEmpty()) {
+                int totalQty = 0;
+                if (existing.getCartId() != null && !existing.getCartId().isEmpty()) {
+                    for (Cart_Item ci : cartItemDAO.findByCartId(existing.getCartId())) {
+                        totalQty += ci.getQty();
+                    }
+                }
+                if (totalQty > 0) {
+                    Customer oldCus = customerDAO.searchById(oldAccount);
+                    if (oldCus != null) {
+                        int newUnits = oldCus.getUnitsConsumed() - totalQty;
+                        if (newUnits < 0) newUnits = 0;
+                        oldCus.setUnitsConsumed(newUnits);
+                        customerDAO.update(oldCus);
+                    }
+                }
+            }
+        }
+        String newCartId = dto.getCartId();
+        int newTotalQty = 0;
+        if (newCartId != null && !newCartId.isEmpty()) {
+            List<Cart_Item> newItems = cartItemDAO.findByCartId(newCartId);
+            for (Cart_Item ci : newItems) {
+                Item item = itemDAO.searchById(ci.getItemId());
+                if (item != null) {
+                    int newQty = item.getQty() - ci.getQty();
+                    if (newQty < 0) newQty = 0;
+                    item.setQty(newQty);
+                    itemDAO.update(item);
+                }
+                newTotalQty += ci.getQty();
+            }
+        }
+        if (dto.getAccountNo() != null && !dto.getAccountNo().isEmpty() && newTotalQty > 0) {
+            Customer newCus = customerDAO.searchById(dto.getAccountNo());
+            if (newCus != null) {
+                newCus.setUnitsConsumed(newCus.getUnitsConsumed() + newTotalQty);
+                customerDAO.update(newCus);
+            }
+        }
         return billDAO.update(new Bill(dto.getBillId(), dto.getBillDate(), dto.getAccountNo(), dto.getCartId(), dto.getDiscount(), dto.getTotalAmount()));
     }
 
     @Override
     public boolean deleteBill(String billId) throws SQLException {
+        Bill existing = billDAO.searchById(billId);
+        if (existing != null) {
+            String cartId = existing.getCartId();
+            int totalQty = 0;
+            if (cartId != null && !cartId.isEmpty()) {
+                List<Cart_Item> items = cartItemDAO.findByCartId(cartId);
+                for (Cart_Item ci : items) {
+                    Item item = itemDAO.searchById(ci.getItemId());
+                    if (item != null) {
+                        item.setQty(item.getQty() + ci.getQty());
+                        itemDAO.update(item);
+                    }
+                    totalQty += ci.getQty();
+                }
+            }
+            String account = existing.getAccountNo();
+            if (account != null && !account.isEmpty() && totalQty > 0) {
+                Customer cus = customerDAO.searchById(account);
+                if (cus != null) {
+                    int newUnits = cus.getUnitsConsumed() - totalQty;
+                    if (newUnits < 0) newUnits = 0;
+                    cus.setUnitsConsumed(newUnits);
+                    customerDAO.update(cus);
+                }
+            }
+        }
         return billDAO.delete(billId);
     }
 
