@@ -296,7 +296,6 @@
         <% if (role != null && role.equalsIgnoreCase("admin")) { %>
         <li><a id="user" class="nav-link" href="user.jsp"><i class="fas fa-user"></i>User</a></li>
         <% } %>
-        <li><a id="help" class="nav-link" href="help.jsp"><i class="fas fa-question-circle"></i>Help</a></li>
         <div class="user-logo" onclick="toggleDropdown(event)">
             <%= username.charAt(0) %>
             <div class="user-dropdown">
@@ -382,7 +381,6 @@
         if (path.endsWith('vendor.jsp')) return 'vendor';
         if (path.endsWith('user.jsp')) return 'user';
         if (path.endsWith('bill.jsp')) return 'bill';
-        if (path.endsWith('help.jsp')) return 'help';
         return 'other';
     }
 
@@ -433,13 +431,6 @@
             bullets: [
                 'Select a customer and add items to generate bills.',
                 'Review bill history to track previous transactions.'
-            ]
-        },
-        help: {
-            title: 'Help Center',
-            bullets: [
-                'Browse FAQs and usage instructions.',
-                'Use the Theme toggle from profile to switch dark/light mode.'
             ]
         },
         other: {
