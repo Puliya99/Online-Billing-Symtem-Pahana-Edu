@@ -441,6 +441,7 @@
     const BASE = '<%= request.getContextPath() %>';
     const cart = [];
     window.itemPrice = 0;
+    window.availableQty = 0;
 
     function updateDebugInfo(message) {
         const debugElement = document.getElementById('debugInfo');
@@ -517,9 +518,10 @@
                     document.getElementById('itemName').value = item.name;
                     const priceNum = Number(item.price);
                     document.getElementById('itemPrice').value = isNaN(priceNum) ? '' : priceNum.toFixed(2);
-                    window.itemPrice = priceNum; // Ensure itemPrice is set
-                    calculateTotal(); // Recalculate after loading price
-                    updateDebugInfo('Loaded item: ' + item.name + ' - Rs. ' + priceNum);
+                    window.itemPrice = priceNum;
+                    window.availableQty = Number(item.qty) || 0;
+                    calculateTotal();
+                    updateDebugInfo('Loaded item: ' + item.name + ' - Rs. ' + priceNum + ' (Available: ' + window.availableQty + ')');
                 }
             }
         };
@@ -696,6 +698,16 @@
             return;
         }
 
+        const available = Number(window.availableQty) || 0;
+        let existingInCart = 0;
+        for (const it of cart) {
+            if (it.itemId === itemId) existingInCart += Number(it.qty) || 0;
+        }
+        if (qty + existingInCart > available) {
+            alert('qty not enough. available qty is: ' + available);
+            return;
+        }
+
         const ensureCartAndAddItem = () => {
             const cartIdInput = document.getElementById('cartId');
             let cartId = cartIdInput.value;
@@ -717,6 +729,7 @@
                                 document.getElementById('qty').value = '';
                                 const elt = document.getElementById('itemLineTotal');
                                 if (elt) elt.innerText = 'Rs. 0.00';
+                                window.availableQty = 0;
                                 recalcGrandTotal();
                             });
                         } else {
