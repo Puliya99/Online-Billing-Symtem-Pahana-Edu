@@ -10,8 +10,8 @@ import java.util.List;
 
 public class BillDAOImpl implements BillDAO {
     private static final String GET_BILLS = "SELECT * FROM bills";
-    private static final String SAVE_BILL = "INSERT INTO bills (bill_id, account_no, item_id, qty, unit_price, discount, total_amount, bill_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String UPDATE_BILL = "UPDATE bills SET account_no = ?, item_id = ?, qty = ?, unit_price = ?, discount = ?, total_amount = ?, bill_date = ? WHERE bill_id = ?";
+    private static final String SAVE_BILL = "INSERT INTO bills (bill_id, account_no, cart_id, discount, total_amount, bill_date) VALUES (?, ?, ?, ?, ?, ?)";
+    private static final String UPDATE_BILL = "UPDATE bills SET account_no = ?, cart_id = ?, discount = ?, total_amount = ?, bill_date = ? WHERE bill_id = ?";
     private static final String DELETE_BILL = "DELETE FROM bills WHERE bill_id = ?";
 
     @Override
@@ -21,9 +21,7 @@ public class BillDAOImpl implements BillDAO {
                 SAVE_BILL,
                 entity.getBillId(),
                 entity.getAccountNo(),
-                entity.getItemId(),
-                entity.getQty(),
-                entity.getUnitPrice(),
+                entity.getCartId(),
                 entity.getDiscount(),
                 entity.getTotalAmount(),
                 sqlDate
@@ -36,9 +34,7 @@ public class BillDAOImpl implements BillDAO {
         return SQLUtil.execute(
                 UPDATE_BILL,
                 entity.getAccountNo(),
-                entity.getItemId(),
-                entity.getQty(),
-                entity.getUnitPrice(),
+                entity.getCartId(),
                 entity.getDiscount(),
                 entity.getTotalAmount(),
                 sqlDate,
@@ -55,7 +51,7 @@ public class BillDAOImpl implements BillDAO {
     public Bill search(String billId) throws SQLException {
         ResultSet rst = SQLUtil.execute("SELECT * FROM bills WHERE bill_id = ?", billId);
         if (rst.next()) {
-            return new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("item_id"), rst.getInt("qty"), rst.getDouble("unit_price"), rst.getInt("discount"), rst.getDouble("total_amount"));
+            return new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("cart_id"), (int) Math.round(rst.getDouble("discount")), rst.getDouble("total_amount"));
         }
         return null;
     }
@@ -65,7 +61,7 @@ public class BillDAOImpl implements BillDAO {
         List<Bill> bills = new ArrayList<>();
         ResultSet rst = SQLUtil.execute(GET_BILLS);
         while (rst.next()) {
-            bills.add(new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("item_id"), rst.getInt("qty"), rst.getDouble("unit_price"), rst.getInt("discount"), rst.getDouble("total_amount")));
+            bills.add(new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("cart_id"), (int) Math.round(rst.getDouble("discount")), rst.getDouble("total_amount")));
         }
         return bills;
     }
@@ -84,7 +80,7 @@ public class BillDAOImpl implements BillDAO {
     public Bill searchById(String billId) throws SQLException {
         ResultSet rst = SQLUtil.execute("SELECT * FROM bills WHERE bill_id = ?", billId);
         if (rst.next()) {
-            return new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("item_id"), rst.getInt("qty"), rst.getDouble("unit_price"), rst.getInt("discount"), rst.getDouble("total_amount"));
+            return new Bill(rst.getString("bill_id"), rst.getDate("bill_date"), rst.getString("account_no"), rst.getString("cart_id"), (int) Math.round(rst.getDouble("discount")), rst.getDouble("total_amount"));
         }
         return null;
     }

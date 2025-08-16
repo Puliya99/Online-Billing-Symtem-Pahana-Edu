@@ -6,7 +6,7 @@
   To change this template use File | Settings | File Templates.
 --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.util.List, com.example.pahanaedubillingsystem.backend.dto.VendorDTO, com.example.pahanaedubillingsystem.backend.bo.BOFactory, com.example.pahanaedubillingsystem.backend.bo.custom.VendorBO" %>
+<%@ page import="java.util.List, java.util.Collections, com.example.pahanaedubillingsystem.backend.dto.VendorDTO, com.example.pahanaedubillingsystem.backend.bo.BOFactory, com.example.pahanaedubillingsystem.backend.bo.custom.VendorBO" %>
 <%@ page import="com.example.pahanaedubillingsystem.backend.bo.custom.ItemBO" %>
 <%@ page import="com.example.pahanaedubillingsystem.backend.dto.ItemDTO" %>
 <!DOCTYPE html>
@@ -182,15 +182,20 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-barcode"></i></span>
                     <select id="itemId" class="form-select" onchange="loadItemDetails()">
-                        <option selected disabled>Select Item</option>
-                        <%
-                            ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
-                            List<ItemDTO> items = itemBO.getAllItems();
-                            for (ItemDTO item : items) {
-                        %>
-                        <option value="<%= item.getItemId() %>"><%= item.getItemId() %></option>
-                        <% } %>
-                    </select>
+                                <option selected disabled>Select Item</option>
+                                <%
+                                    List<ItemDTO> items;
+                                    try {
+                                        ItemBO itemBO = (ItemBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.ITEM);
+                                        items = itemBO.getAllItems();
+                                    } catch (Exception ex) {
+                                        items = Collections.emptyList();
+                                    }
+                                    for (ItemDTO item : items) {
+                                %>
+                                <option value="<%= item.getItemId() %>"><%= item.getItemId() %></option>
+                                <% } %>
+                            </select>
                 </div>
             </div>
             <div class="form-group">
@@ -251,8 +256,13 @@
                 </thead>
                 <tbody id="vendorTable">
                 <%
-                    VendorBO vendorBO = (VendorBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.VENDOR);
-                    List<VendorDTO> vendors = vendorBO.getAllVendors();
+                    List<VendorDTO> vendors;
+                    try {
+                        VendorBO vendorBO = (VendorBO) BOFactory.getBoFactory().getBO(BOFactory.BOTypes.VENDOR);
+                        vendors = vendorBO.getAllVendors();
+                    } catch (Exception ex) {
+                        vendors = Collections.emptyList();
+                    }
                     for (VendorDTO vendor : vendors) {
                 %>
                 <tr onclick="selectVendor('<%= vendor.getGrnId() %>', '<%= vendor.getName() %>', '<%= vendor.getItemId() %>', '<%= vendor.getDescription() %>', <%= vendor.getQty() %>, <%= vendor.getBuyingPrice() %>)">
@@ -271,6 +281,7 @@
 </div>
 
 <script>
+    const BASE = '<%= request.getContextPath() %>';
     let rowIndex = null;
 
     function loadId() {
@@ -325,7 +336,7 @@
         const itemId = document.getElementById('itemId').value;
         if (!itemId) return;
         const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'http://localhost:8081/PahanaEduBillingSystem/ItemModel', true);
+        xhr.open('GET', BASE + '/ItemModel', true);
         xhr.onreadystatechange = function () {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 const items = JSON.parse(xhr.responseText);

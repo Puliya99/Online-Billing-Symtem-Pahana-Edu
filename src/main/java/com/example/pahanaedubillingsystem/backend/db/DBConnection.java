@@ -30,7 +30,6 @@ public class DBConnection {
 
     public Connection getConnection() throws SQLException {
         if (this.dataSource == null) {
-            // Try to re-initialize in case the context becomes available later
             initDataSource();
         }
         if (this.dataSource == null) {

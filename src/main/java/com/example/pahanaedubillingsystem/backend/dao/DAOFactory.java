@@ -13,7 +13,7 @@ public class DAOFactory {
     }
 
     public enum DAOTypes {
-        CUSTOMER, ITEM, BILL, USER, VENDOR
+        CUSTOMER, ITEM, BILL, USER, VENDOR, CART, CART_ITEM;
     }
 
     public SuperDAO getDAO(DAOTypes types) {
@@ -28,6 +28,10 @@ public class DAOFactory {
                 return new BillDAOImpl();
             case VENDOR:
                 return new VendorDAOImpl();
+            case CART:
+                return new CartDAOImpl();
+            case CART_ITEM:
+                return new CartItemDAOImpl();
             default:
                 return null;
         }
