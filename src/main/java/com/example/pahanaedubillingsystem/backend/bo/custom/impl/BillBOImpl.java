@@ -16,7 +16,6 @@ public class BillBOImpl implements BillBO {
 
     @Override
     public boolean saveBill(BillDTO dto) throws SQLException {
-        // Minimal validation for this step: directly save bill; cart existence is not enforced here
         return billDAO.save(new Bill(dto.getBillId(), dto.getBillDate(), dto.getAccountNo(), dto.getCartId(), dto.getDiscount(), dto.getTotalAmount()));
     }
 

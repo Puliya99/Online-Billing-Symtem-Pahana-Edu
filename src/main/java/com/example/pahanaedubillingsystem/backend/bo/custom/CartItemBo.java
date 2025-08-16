@@ -14,10 +14,6 @@ public interface CartItemBo extends SuperBO {
     List<CartItemDTO> getAllCartItems() throws SQLException;
     List<String> getCartItemIds() throws SQLException;
     CartItemDTO searchByIdCartItem(String cartId) throws SQLException;
-
-    // Custom query
     List<CartItemDTO> getItemsForCart(String cartId) throws SQLException;
-
-    // Deletions by composite key
     boolean removeItem(String cartId, String itemId) throws SQLException;
 }

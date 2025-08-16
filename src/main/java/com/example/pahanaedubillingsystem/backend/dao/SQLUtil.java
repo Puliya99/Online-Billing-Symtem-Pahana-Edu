@@ -21,7 +21,7 @@ public class SQLUtil {
                 try (ResultSet rs = pstm.executeQuery()) {
                     CachedRowSet crs = RowSetProvider.newFactory().createCachedRowSet();
                     crs.populate(rs);
-                    return (T) crs; // Disconnected result set; safe after closing resources
+                    return (T) crs;
                 }
             } else {
                 int updated = pstm.executeUpdate();
