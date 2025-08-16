@@ -6,10 +6,12 @@ import com.example.pahanaedubillingsystem.backend.dao.custom.BillDAO;
 import com.example.pahanaedubillingsystem.backend.dao.custom.CartDAO;
 import com.example.pahanaedubillingsystem.backend.dao.custom.CartItemDAO;
 import com.example.pahanaedubillingsystem.backend.dao.custom.ItemDAO;
+import com.example.pahanaedubillingsystem.backend.dao.custom.CustomerDAO;
 import com.example.pahanaedubillingsystem.backend.dto.BillDTO;
 import com.example.pahanaedubillingsystem.backend.entity.Bill;
 import com.example.pahanaedubillingsystem.backend.entity.Cart_Item;
 import com.example.pahanaedubillingsystem.backend.entity.Item;
+import com.example.pahanaedubillingsystem.backend.entity.Customer;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -20,11 +22,14 @@ public class BillBOImpl implements BillBO {
     private final CartDAO cartDAO = (CartDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CART);
     private final CartItemDAO cartItemDAO = (CartItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CART_ITEM);
     private final ItemDAO itemDAO = (ItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.ITEM);
+    private final CustomerDAO customerDAO = (CustomerDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CUSTOMER);
 
     @Override
     public boolean saveBill(BillDTO dto) throws SQLException {
         boolean saved = billDAO.save(new Bill(dto.getBillId(), dto.getBillDate(), dto.getAccountNo(), dto.getCartId(), dto.getDiscount(), dto.getTotalAmount()));
         if (!saved) return false;
+
+        int totalQtyInCart = 0;
 
         if (dto.getCartId() != null && !dto.getCartId().isEmpty()) {
             List<Cart_Item> cartItems = cartItemDAO.findByCartId(dto.getCartId());
@@ -33,11 +38,23 @@ public class BillBOImpl implements BillBO {
                 if (item != null) {
                     int currentQty = item.getQty();
                     int newQty = currentQty - ci.getQty();
+                    if (newQty < 0) newQty = 0;
                     item.setQty(newQty);
                     itemDAO.update(item);
                 }
+                totalQtyInCart += ci.getQty();
             }
         }
+
+        if (dto.getAccountNo() != null && !dto.getAccountNo().isEmpty() && totalQtyInCart > 0) {
+            Customer customer = customerDAO.searchById(dto.getAccountNo());
+            if (customer != null) {
+                int currentUnits = customer.getUnitsConsumed();
+                customer.setUnitsConsumed(currentUnits + totalQtyInCart);
+                customerDAO.update(customer);
+            }
+        }
+
         return true;
     }
 
