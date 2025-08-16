@@ -414,9 +414,11 @@
         dashboard: {
             title: 'Welcome to your Dashboard',
             bullets: [
-                'View key stats like total Customers, Items, and Bills at a glance.',
-                'Use the top navigation to switch between modules.',
-                'Switch Theme from the profile circle in the top-right.'
+                'See Sales, Cost of Sales, and Gross Profit cards for Today/Week/Month/Year.',
+                'A personal greeting shows Sri Lanka local time at the top.',
+                'Check the Items Sold line chart; scroll horizontally to view many items.',
+                'Switch Theme from the profile circle; charts and UI adapt to Dark Mode.',
+                'Use the top navigation to switch between modules.'
             ]
         },
         customer: {
@@ -440,8 +442,9 @@
             title: 'Vendor Management Tips',
             bullets: [
                 'Record GRNs with item and quantity to update stock.',
-                'Pick an Item ID to auto-fill description.',
-                'Use Search and Export to manage vendor records.'
+                'Use the GRN Date field and filter the table by date when needed.',
+                'CSV Export now includes grn_date for each record.',
+                'Pick an Item ID to auto-fill description.'
             ]
         },
         user: {
@@ -455,8 +458,10 @@
         bill: {
             title: 'Billing Tips',
             bullets: [
-                'Select a customer and add items to generate bills.',
-                'Review bill history to track previous transactions.'
+                'Use the Date picker to set the bill date and filter history by date.',
+                'Click the eye icon in Bill History to view cart items in a read-only popup.',
+                'Stock is validated before adding items: you will be warned if qty is not enough.',
+                'Deleting or updating bills adjusts item stock and customer units automatically.'
             ]
         },
         other: {
