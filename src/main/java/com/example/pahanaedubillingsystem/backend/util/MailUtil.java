@@ -16,6 +16,12 @@ public class MailUtil {
 
     private static Properties loadProperties() {
         Properties props = new Properties();
+
+        if ("true".equals(System.getProperty("test.mode"))) {
+            log.info("Skipping application.properties load in test mode");
+            return props;
+        }
+
         try (InputStream in = MailUtil.class.getClassLoader().getResourceAsStream("application.properties")) {
             if (in != null) {
                 props.load(in);
@@ -35,10 +41,9 @@ public class MailUtil {
             String port = getCfg("mail.port", getCfg("MAIL_PORT", "587"));
             String user = getCfg("mail.user", getCfg("MAIL_USER", null));
             String pass = getCfg("mail.pass", getCfg("MAIL_PASS", null));
-            String from = getCfg("mail.from", getCfg("MAIL_FROM", user != null ? user : "mathagadeerapulinda@gmail.com"));
+            String from = getCfg("mail.from", getCfg("MAIL_FROM", user != null ? user : "noreply@example.com"));
             String tlsCfg = getCfg("mail.tls", getCfg("MAIL_TLS", ""));
-            boolean isO365 = host != null && host.toLowerCase().matches(".*(office365|outlook|live)\\.com$");
-            boolean tls = tlsCfg.isEmpty() ? ("587".equals(port) || isO365) : Boolean.parseBoolean(tlsCfg);
+            boolean tls = tlsCfg.isEmpty() ? "587".equals(port) : Boolean.parseBoolean(tlsCfg);
 
             if (host == null || host.trim().isEmpty()) {
                 log.info("mail.host not set; skipping email to {} (email delivery disabled)", safe(to));
@@ -75,27 +80,20 @@ public class MailUtil {
             message.setSubject(subject);
             message.setText(body);
 
+            if ("true".equals(System.getProperty("test.mode"))) {
+                log.info("Test mode active, not sending real email to {}", safe(to));
+                return false;
+            }
+
             Transport.send(message);
             log.info("Mail sent to {} with subject '{}'", safe(to), safe(subject));
             return true;
+
         } catch (AuthenticationFailedException afe) {
-            String msg = afe.getMessage() != null ? afe.getMessage() : afe.toString();
-            String lower = msg.toLowerCase();
-            String userCfg = safe(getCfg("mail.user", ""));
-            String hostCfg = safe(getCfg("mail.host", ""));
-            boolean isGmail = (hostCfg.toLowerCase().contains("gmail.com") || lower.contains("support.google.com") || lower.contains("gsmtp"));
-            boolean isO365 = (hostCfg.toLowerCase().contains("office365") || hostCfg.toLowerCase().contains("outlook") || lower.contains("authentication unsuccessful") || lower.contains("basic authentication is disabled"));
-            if (isGmail) {
-                log.warn("SMTP authentication failed for user '{}'. Gmail typically requires an App Password with 2‑Step Verification. Configure: mail.host=smtp.gmail.com, mail.port=587, mail.tls=true, mail.user=<your Gmail>, mail.pass=<App Password>. See https://support.google.com/accounts/answer/185833 and https://support.google.com/mail/?p=BadCredentials. Details: {}", userCfg, msg);
-            } else if (lower.contains("535") || isO365) {
-                log.warn("SMTP authentication failed for user '{}'. Your mail server may have disabled Basic Auth. If using Office 365, enable SMTP AUTH for the mailbox or use an app password/modern auth. Details: {}", userCfg, msg);
-            } else {
-                log.warn("SMTP authentication failed: {}", msg);
-            }
+            log.warn("SMTP authentication failed: {}", afe.getMessage());
             return false;
         } catch (MessagingException me) {
-            String msg = me.getMessage() != null ? me.getMessage() : me.toString();
-            log.warn("Failed to send email to {}: {}", safe(to), msg);
+            log.warn("Failed to send email to {}: {}", safe(to), me.getMessage());
             return false;
         } catch (Exception e) {
             log.error("Failed to send email to {}: {}", safe(to), e.getMessage());
