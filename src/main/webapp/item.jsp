@@ -273,7 +273,7 @@
       alert('Please enter a valid Item ID (e.g., I001)!');
       return false;
     }
-    if (!/^[A-Za-z./0-9-\s]+$/.test(name)) {
+    if (!/^[A-Za-z./0-9-,'()\s]+$/.test(name)) {
       alert('Please enter a valid description!');
       return false;
     }

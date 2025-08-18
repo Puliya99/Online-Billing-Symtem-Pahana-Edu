@@ -338,7 +338,7 @@
             alert('Please select a valid GRN Date!');
             return false;
         }
-        if (!/^[A-Za-z\s]{4,60}$/.test(name)) {
+        if (!/^[A-Za-z\s,0-9'()]{4,60}$/.test(name)) {
             alert('Please enter a valid vendor name!');
             return false;
         }
@@ -346,7 +346,7 @@
             alert('Please enter a valid Item ID (e.g., I001)!');
             return false;
         }
-        if (!/^[A-Za-z./0-9-\s]+$/.test(description)) {
+        if (!/^[A-Za-z./0-9-,'()\s]+$/.test(description)) {
             alert('Please enter a valid description!');
             return false;
         }
