@@ -204,9 +204,33 @@ Edit `src/main/webapp/META-INF/context.xml` with your MySQL credentials:
 
 ### 🚀 Run / Deploy
 
-- Using Maven: `mvn clean package` then deploy the WAR to Tomcat
-- Or run in your IDE with a configured Tomcat server
-- Access the app at: `http://localhost:8081/PahanaEduBillingSystem/login.jsp`
+Prerequisites:
+- Java 11 (JDK 11)
+- Maven 3.8+
+- Apache Tomcat 9.x (javax servlet)
+
+Build the WAR:
+- Run: `mvn clean package -DskipTests`
+- Output: `target/PahanaEduBillingSystem-1.0-SNAPSHOT.war`
+
+Deploy to Tomcat (standalone):
+- Copy the WAR to `$TOMCAT_HOME/webapps/`
+  - Or use Tomcat Manager App to deploy the WAR
+- Start Tomcat:
+  - Linux/Mac: `$TOMCAT_HOME/bin/startup.sh`
+  - Windows: `%TOMCAT_HOME%\bin\startup.bat`
+- Access the app:
+  - Default: `http://localhost:8080/PahanaEduBillingSystem/login.jsp`
+  - If your Tomcat is configured to 8081: `http://localhost:8081/PahanaEduBillingSystem/login.jsp`
+
+Run from IDE (IntelliJ IDEA/Eclipse):
+- Configure a Tomcat 9 server with JDK 11
+- Add artifact: "PahanaEduBillingSystem: war exploded"
+- Set application context: `/PahanaEduBillingSystem`
+- Run the server and open the URL as above
+
+Notes:
+- Ensure `src/main/webapp/META-INF/context.xml` has correct DB credentials (see section above)
 
 ---
 
