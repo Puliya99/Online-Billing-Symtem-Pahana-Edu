@@ -9,7 +9,6 @@ class MailUtilTest {
 
     @BeforeAll
     static void enableTestMode() {
-        // Prevents real Gmail configs from loading
         System.setProperty("test.mode", "true");
     }
 
@@ -46,6 +45,6 @@ class MailUtilTest {
         System.setProperty("mail.user", "fakeuser@gmail.com");
         System.setProperty("mail.pass", "wrong");
         boolean result = MailUtil.send("someone@example.com", "subject", "body");
-        assertFalse(result); // Will return false since test.mode disables real sending
+        assertFalse(result);
     }
 }

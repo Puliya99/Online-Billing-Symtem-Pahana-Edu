@@ -204,9 +204,33 @@ Edit `src/main/webapp/META-INF/context.xml` with your MySQL credentials:
 
 ### 🚀 Run / Deploy
 
-- Using Maven: `mvn clean package` then deploy the WAR to Tomcat
-- Or run in your IDE with a configured Tomcat server
-- Access the app at: `http://localhost:8081/PahanaEduBillingSystem/login.jsp`
+Prerequisites:
+- Java 11 (JDK 11)
+- Maven 3.8+
+- Apache Tomcat 9.x (javax servlet)
+
+Build the WAR:
+- Run: `mvn clean package -DskipTests`
+- Output: `target/PahanaEduBillingSystem-1.0-SNAPSHOT.war`
+
+Deploy to Tomcat (standalone):
+- Copy the WAR to `$TOMCAT_HOME/webapps/`
+  - Or use Tomcat Manager App to deploy the WAR
+- Start Tomcat:
+  - Linux/Mac: `$TOMCAT_HOME/bin/startup.sh`
+  - Windows: `%TOMCAT_HOME%\bin\startup.bat`
+- Access the app:
+  - Default: `http://localhost:8080/PahanaEduBillingSystem/login.jsp`
+  - If your Tomcat is configured to 8081: `http://localhost:8081/PahanaEduBillingSystem/login.jsp`
+
+Run from IDE (IntelliJ IDEA/Eclipse):
+- Configure a Tomcat 9 server with JDK 11
+- Add artifact: "PahanaEduBillingSystem: war exploded"
+- Set application context: `/PahanaEduBillingSystem`
+- Run the server and open the URL as above
+
+Notes:
+- Ensure `src/main/webapp/META-INF/context.xml` has correct DB credentials (see section above)
 
 ---
 
@@ -221,7 +245,11 @@ Password: admin123
 
 ## 🎯 UML Diagrams
 
-- Use Case, Class, and Sequence diagrams are available in `/docs/` (if provided) or the project report.
+- Use Case Diagram: https://drive.google.com/file/d/1_Oj-9n_ml0gXQaQhWOV6w4XZYQxX-StE/view?usp=sharing
+- Class Diagram: https://drive.google.com/file/d/19O7kZw0kIejuqp-7bD3ddlAJCU7pNeg2/view?usp=sharing
+- Sequence Diagram: https://app.eraser.io/workspace/g1WFMfvpHRdA7CuR59Y4?origin=share
+
+Note: Viewing permission is not required to access links. Only viewing and commenting is possible.
 
 ---
 
@@ -258,3 +286,11 @@ This project is licensed under the **MIT License**.
 📧 **Email**: [st20343553@outlook.cardiffmet.ac.uk](mailto:st20343553@outlook.cardiffmet.ac.uk)
 
 > ✨ _“Built for better education management — fast, secure, and user-friendly.”_
+
+---
+
+## 📎 Additional Resources
+
+- UI Interface – https://drive.google.com/drive/folders/1dwDx3gMoqZl113xNgCl4usoeoOA4i3fK?usp=drive_link
+- Test Resources– https://drive.google.com/drive/folders/1sU5tvjM8pKmjypa-Zp9MhqO2gGf-PsRF?usp=drive_link
+- Video – https://drive.google.com/drive/folders/1O_41OTMnAN2aKIoIAYZZJKDsLUl3W1Nv?usp=drive_link
