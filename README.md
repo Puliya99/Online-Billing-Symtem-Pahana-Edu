@@ -245,7 +245,11 @@ Password: admin123
 
 ## 🎯 UML Diagrams
 
-- Use Case, Class, and Sequence diagrams are available in `/docs/` (if provided) or the project report.
+- Use Case Diagram: https://drive.google.com/file/d/1_Oj-9n_ml0gXQaQhWOV6w4XZYQxX-StE/view?usp=sharing
+- Class Diagram: https://drive.google.com/file/d/19O7kZw0kIejuqp-7bD3ddlAJCU7pNeg2/view?usp=sharing
+- Sequence Diagram: https://app.eraser.io/workspace/g1WFMfvpHRdA7CuR59Y4?origin=share
+
+Note: Viewing permission is not required to access links. Only viewing and commenting is possible.
 
 ---
 
