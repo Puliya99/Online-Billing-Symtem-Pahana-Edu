@@ -286,3 +286,11 @@ This project is licensed under the **MIT License**.
 📧 **Email**: [st20343553@outlook.cardiffmet.ac.uk](mailto:st20343553@outlook.cardiffmet.ac.uk)
 
 > ✨ _“Built for better education management — fast, secure, and user-friendly.”_
+
+---
+
+## 📎 Additional Resources
+
+- UI Interface – https://drive.google.com/drive/folders/1dwDx3gMoqZl113xNgCl4usoeoOA4i3fK?usp=drive_link
+- Test Resources– https://drive.google.com/drive/folders/1sU5tvjM8pKmjypa-Zp9MhqO2gGf-PsRF?usp=drive_link
+- Video – https://drive.google.com/drive/folders/1O_41OTMnAN2aKIoIAYZZJKDsLUl3W1Nv?usp=drive_link
