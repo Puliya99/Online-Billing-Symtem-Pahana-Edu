@@ -19,7 +19,6 @@ import java.util.List;
 
 public class BillBOImpl implements BillBO {
     private final BillDAO billDAO = (BillDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.BILL);
-    private final CartDAO cartDAO = (CartDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CART);
     private final CartItemDAO cartItemDAO = (CartItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CART_ITEM);
     private final ItemDAO itemDAO = (ItemDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.ITEM);
     private final CustomerDAO customerDAO = (CustomerDAO) DAOFactory.getDaoFactory().getDAO(DAOFactory.DAOTypes.CUSTOMER);

@@ -104,18 +104,45 @@ public class CustomerImportController extends HttpServlet {
                 }
 
                 try {
-                    boolean ok = customerBO.saveCustomer(new CustomerDTO(accountNo, name, address, telephone, units));
+                    CustomerDTO dto = new CustomerDTO(accountNo, name, address, telephone, units);
+                    boolean ok = customerBO.saveCustomer(dto);
                     if (ok) {
                         imported++;
                     } else {
-                        skipped++;
-                        errors.append("Row ").append(total).append(": Could not save (maybe duplicate account_no)\n");
+                        try {
+                            boolean updated = customerBO.updateCustomer(dto);
+                            if (updated) {
+                                imported++;
+                            } else {
+                                skipped++;
+                                errors.append("Row ").append(total).append(": Could not save or update (account_no may be invalid)\n");
+                            }
+                        } catch (Exception ex) {
+                            skipped++;
+                            String umsg = ex.getMessage() != null ? ex.getMessage() : ex.toString();
+                            errors.append("Row ").append(total).append(": Update error - ").append(umsg).append("\n");
+                            logger.error("Error updating existing customer on row {}: {}", total, line, ex);
+                        }
                     }
                 } catch (Exception e) {
-                    skipped++;
-                    String msg = e.getMessage() != null ? e.getMessage() : e.toString();
-                    errors.append("Row ").append(total).append(": Error - ").append(msg).append("\n");
-                    logger.error("Error importing customer row {}: {}", total, line, e);
+                    try {
+                        CustomerDTO dto = new CustomerDTO(accountNo, name, address, telephone, units);
+                        boolean updated = customerBO.updateCustomer(dto);
+                        if (updated) {
+                            imported++;
+                        } else {
+                            skipped++;
+                            String msg = e.getMessage() != null ? e.getMessage() : e.toString();
+                            errors.append("Row ").append(total).append(": Error - ").append(msg).append("; Update also failed\n");
+                            logger.error("Error importing customer row {} (save failed, update failed too): {}", total, line, e);
+                        }
+                    } catch (Exception ex) {
+                        skipped++;
+                        String msg = e.getMessage() != null ? e.getMessage() : e.toString();
+                        String umsg = ex.getMessage() != null ? ex.getMessage() : ex.toString();
+                        errors.append("Row ").append(total).append(": Error - ").append(msg).append("; Update error - ").append(umsg).append("\n");
+                        logger.error("Error importing customer row {}: {}; then update error: {}", total, line, ex);
+                    }
                 }
             }
         } catch (Exception e) {
