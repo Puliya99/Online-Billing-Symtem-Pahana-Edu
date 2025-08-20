@@ -113,18 +113,45 @@ public class ItemImportController extends HttpServlet {
                 }
 
                 try {
-                    boolean ok = itemBO.saveItem(new ItemDTO(itemId, name, price, qty));
+                    ItemDTO dto = new ItemDTO(itemId, name, price, qty);
+                    boolean ok = itemBO.saveItem(dto);
                     if (ok) {
                         imported++;
                     } else {
-                        skipped++;
-                        errors.append("Row ").append(total).append(": Could not save (maybe duplicate item_id)\n");
+                        try {
+                            boolean updated = itemBO.updateItem(dto);
+                            if (updated) {
+                                imported++;
+                            } else {
+                                skipped++;
+                                errors.append("Row ").append(total).append(": Could not save or update (item_id may be invalid)\n");
+                            }
+                        } catch (Exception ex) {
+                            skipped++;
+                            String umsg = ex.getMessage() != null ? ex.getMessage() : ex.toString();
+                            errors.append("Row ").append(total).append(": Update error - ").append(umsg).append("\n");
+                            logger.error("Error updating existing item on row {}: {}", total, line, ex);
+                        }
                     }
                 } catch (Exception e) {
-                    skipped++;
-                    String msg = e.getMessage() != null ? e.getMessage() : e.toString();
-                    errors.append("Row ").append(total).append(": Error - ").append(msg).append("\n");
-                    logger.error("Error importing item row {}: {}", total, line, e);
+                    try {
+                        ItemDTO dto = new ItemDTO(itemId, name, price, qty);
+                        boolean updated = itemBO.updateItem(dto);
+                        if (updated) {
+                            imported++;
+                        } else {
+                            skipped++;
+                            String msg = e.getMessage() != null ? e.getMessage() : e.toString();
+                            errors.append("Row ").append(total).append(": Error - ").append(msg).append("; Update also failed\n");
+                            logger.error("Error importing item row {} (save failed, update failed too): {}", total, line, e);
+                        }
+                    } catch (Exception ex) {
+                        skipped++;
+                        String msg = e.getMessage() != null ? e.getMessage() : e.toString();
+                        String umsg = ex.getMessage() != null ? ex.getMessage() : ex.toString();
+                        errors.append("Row ").append(total).append(": Error - ").append(msg).append("; Update error - ").append(umsg).append("\n");
+                        logger.error("Error importing item row {}: {}; then update error: {}", total, line, ex);
+                    }
                 }
             }
         } catch (Exception e) {
